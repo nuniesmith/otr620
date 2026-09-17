@@ -1,0 +1,13 @@
+need to research how i can use a raspberry pi pico 2W to add to the project to control the blue leds, fan (if needed), power management so i can use a single usb c into the pi, the pi can power the gps, lights, charge the airpods with a usb c connector or wireless charging built into the airpods mount.
+the front of the bracket we can add buttons to control the pi for main power, power for the gps, power for the lights, and power for the fan etc. 
+I do have wifi in the truck with starlink so the pi can connect to the wifi for playing with it once its installed to add more features, might look into
+adding gps tracking for when im driving later on, i should be able to ssh into the pi depending what OS we use, note sure if we can run a ubuntu base OS or not. In the future, would be nice to keep track of km/miles travelled, states/provinces/countries travelled to for the calandar year. Later i might use this gps into to feed into a map and traffic api to get real time traffic updates. I know tomtom has a free api to play with, more live traffic updates are a good thing. The garmin gps is pretty good at making sure i am on the right road with a big truck at 13'6" standard reefer trailers usually.
+
+review the pdf with the tomtom free api starting points, i think for my personal use, it should be enough to play with later on with a pi into this unit.
+
+Go over the pros and cons of having 1 or 2 usb c cables into the back of the bracket. If we have 2, we can power the pi and the gps separately, if we have 1, we can power both with the same usb c cable. The gps doesn't need much power, 5V at 1A so there should be enough power for the pi to power the gps but might add extra failure points.
+
+Google also has a free tier with their maps api, so we could build different map apis and use them on the free tier and also get differet sources for live traffic.
+
+Another idea, with the pi having gps data and tracking it, i would like to setup a physical map of canada and USA at home for the wife, this would have a little truck on the map of where i am in real time. At home, something like a small tv/monitor with another pi to hdmi would work fine i am sure.
+
