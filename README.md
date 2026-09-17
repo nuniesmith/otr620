@@ -295,6 +295,108 @@ finally:
     GPIO.cleanup()
 ```
 
+### In-Cab Status Display & Dashboard HUD (I2C OLED)
+
+To provide the driver with real-time feedback on the bracket's operating state, we will mount a small, high-contrast **SSD1306 I2C OLED display** (0.96" or 1.3" with 128x64 pixels) on the front of the bracket faceplate. OLEDs are highly readable at night and in direct sunlight due to self-emitting pixels.
+
+#### 1. Real-Time Telemetry Screen Layout
+The 128x64 pixel canvas will be split into 4 clear rows:
+* **Row 1 (System Connectivity):** `Wi-Fi: Starlink_Truck (Good)`
+* **Row 2 (VPN & Remote Access):** `IP: 100.112.44.82 (Tailscale)`
+* **Row 3 (Thermal State):** `Temp: 38.4°C  | Fan: 62%`
+* **Row 4 (Power Switch State):** `GPS: ON | LED: OFF`
+
+#### 2. Electrical Wiring Schematic (I2C Bus)
+The SSD1306 uses the I2C serial protocol. The Pi has built-in hardware I2C lines on Pins 3 and 5. The display runs on **3.3V logic**, meaning it matches the Pi's internal GPIO voltage perfectly (avoid running the screen on 5V, as it can damage the Pi's I2C lines if pull-up resistors are on the display board).
+
+```
+     Raspberry Pi GPIO Header                 SSD1306 OLED Display (4-Pin)
+    ┌────────────────────────┐               ┌──────────────────────────┐
+    │  [Pin 1]  3.3V Power   ├───────────────┤   VCC                    │
+    │  [Pin 3]  SDA (I2C)    ├───────────────┤   SDA                    │
+    │  [Pin 5]  SCL (I2C)    ├───────────────┤   SCL                    │
+    │  [Pin 9]  Ground (GND) ├───────────────┤   GND                    │
+    └────────────────────────┘               └──────────────────────────┘
+```
+
+#### 3. Python OLED Display Driver Script
+
+The Python script leverages the **`luma.oled`** library (which handles screen drawing, font rendering, and hardware buffering) and the **`Pillow (PIL)`** library to draw text and custom symbols:
+
+```python
+import os
+import subprocess
+import time
+from PIL import Image, ImageDraw, ImageFont
+from luma.core.interface.serial import i2c
+from luma.core.render import canvas
+from luma.oled.device import ssd1306
+
+# Initialize I2C interface and SSD1306 screen
+serial = i2c(port=1, address=0x3C)
+device = ssd1306(serial)
+
+# Load a default clean pixel font (or path to a TrueType font)
+font = ImageFont.load_default()
+
+def get_wifi_info():
+    """Gets the active Wi-Fi SSID and signal status."""
+    try:
+        ssid = subprocess.check_output("iwgetid -r", shell=True).decode("utf-8").strip()
+        if not ssid:
+            return "Disconnected", "No Link"
+        return ssid, "Starlink"
+    except Exception:
+        return "Offline", "No Wi-Fi"
+
+def get_tailscale_ip():
+    """Gets the private Tailscale VPN IP of the truck."""
+    try:
+        output = subprocess.check_output("tailscale ip -4", shell=True).decode("utf-8").strip()
+        return output if output else "No IP"
+    except Exception:
+        return "No VPN"
+
+def get_pi_temp():
+    """Reads the core temperature of the Pi (as fallback for DS18B20)."""
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+            temp = float(f.read()) / 1000.0
+            return f"{temp:.1f}C"
+    except Exception:
+        return "N/A"
+
+try:
+    print("In-Cab OLED Monitor Daemon Active...")
+    while True:
+        ssid, net_type = get_wifi_info()
+        ip_addr = get_tailscale_ip()
+        temp_str = get_pi_temp()
+        
+        # Hypothetical fan speed & switch variables from the control thread
+        fan_speed = "45%"  
+        gps_status = "ON"
+        led_status = "OFF"
+        
+        with canvas(device) as draw:
+            # Draw Row 1: Wi-Fi SSID
+            draw.text((0, 0), f"Wi-Fi: {ssid[:14]}", font=font, fill=255)
+            
+            # Draw Row 2: Tailscale IP
+            draw.text((0, 16), f"VPN: {ip_addr}", font=font, fill=255)
+            
+            # Draw Row 3: Temperature & Fan Speed
+            draw.text((0, 32), f"Temp: {temp_str} | Fan: {fan_speed}", font=font, fill=255)
+            
+            # Draw Row 4: Power Switch States
+            draw.text((0, 48), f"GPS: {gps_status} | LED: {led_status}", font=font, fill=255)
+            
+        time.sleep(2)
+
+except KeyboardInterrupt:
+    print("OLED service stopped.")
+```
+
 ---
 
 ## Next Planning Phases

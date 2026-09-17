@@ -162,6 +162,30 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 
 ---
 
+## 9. Status Display & Dashboard HUD (I2C OLED)
+
+- [ ] Select and size the **SSD1306/SH1106 I2C OLED display**:
+  - Choose between a 0.96" (smaller, standard) or 1.3" (highly readable) 128x64 display panel.
+  - Verify that the display uses standard 4-pin I2C connectors (VCC, GND, SCL, SDA).
+- [ ] Model the **display bezel & mount** on the bracket front:
+  - Create a precise rectangular cutout on the front faceplate for the OLED screen area.
+  - Design internal mounting points (screw bosses or slide-in clips) on the rear of the faceplate to secure the display securely against the window.
+  - Route the I2C wires cleanly behind the display to prevent interference with the sound duct or AirPods tray.
+- [ ] Wire the screen to the Pi:
+  - Connect **VCC** directly to **Pi 3.3V (Pin 1)** to match logic levels.
+  - Connect **GND** directly to **Pi Ground (Pin 9)**.
+  - Connect **SDA** to **GPIO 2 (Pin 3)** and **SCL** to **GPIO 3 (Pin 5)**.
+- [ ] Configure and test the Display Software on the Pi OS:
+  - Enable the I2C interface via `sudo raspi-config` or adding `dtparam=i2c_arm=on` to `/boot/firmware/config.txt`.
+  - Verify address detection via `i2cdetect -y 1` (default address should be `0x3C` or `0x3D`).
+  - Install python dependencies: `pip install luma.oled pillow`.
+  - Deploy the in-cab display monitor python daemon script under `src/pi/`.
+  - Hook up system queries inside the script to fetch the current Starlink Wi-Fi SSID, local IP address, and Tailscale VPN status.
+  - Integrate variables from the fan controller and physical buttons threads to dynamically update fan speed percentages and switch statuses (GPS/LEDs) on the screen.
+  - Set the script to boot on startup as a persistent `systemd` system service.
+
+---
+
 ## Fit result record
 
 Copy this table for each test or revision. Blank cells indicate information still to record.
