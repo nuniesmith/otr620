@@ -25,6 +25,8 @@ Baseline: **V3.1 fit prototype**, September 17, 2026. Checked items reflect work
 
 ## 1. Truck and accessory tests — next work
 
+**In progress:** the user is printing the four v0.2 test files. Do not mark fit validation complete until results are recorded. The v0.3 tab/nut tests remain separate.
+
 Goal: verify the truck and accessories before committing to the full print; the GPS is not required for these steps.
 
 - [ ] Confirm filament, nozzle diameter and slicer profile for the Ender 3 Neo.
@@ -85,6 +87,9 @@ Goal: verify the truck and accessories before committing to the full print; the 
   3. **Blue LEDs Power** (manual control of ambient bracket lighting).
   4. **Cooling Fan Power** (manual override / auto toggle for compartment fan).
 - [ ] Select appropriate panel-mount miniature toggle or tactile push buttons matching the front depth and width clearances.
+- [ ] Define controlled shutdown and power-hold hardware before enabling ignition or master power cutoff on the Linux Pi.
+- [ ] Recalculate combined power demand with the selected Pi and all peripherals; the previous 5 V/4 A allowance is not a verified system rating.
+- [ ] Keep initial Garmin power separate and prevent accessory/controller resets from interrupting it.
 - [ ] Ensure power wiring route stays clear of the speaker duct and mechanical stress points during faceplate removal.
 
 ---
@@ -93,8 +98,10 @@ Goal: verify the truck and accessories before committing to the full print; the 
 
 Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to track physical coordinates and display them on a real-time map at home.
 
-- [ ] Select the controller board: compare Raspberry Pi Zero 2W (supports native Linux, standard Python, full Tailscale client, web hosting) against Pi Pico 2W (lightweight but extremely difficult network stack).
+- [x] Select **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite** for Linux services plus local peripheral control.
+- [ ] Select and verify the board/OS-specific GPIO and hardware PWM backend; configure I²C and 1-Wire for the chosen peripherals.
 - [ ] Install **Tailscale** on the selected in-cab Pi; verify connection through the truck's Starlink Wi-Fi.
+- [ ] Select and bench-test a GNSS receiver or verify a usable live Garmin interface; do not assume the OTR620 exports NMEA.
 - [ ] Write a telemetry background service under `src/pi/` to:
   * Read NMEA GPS data from a connected GPS receiver module.
   * Keep track of cumulative km/miles travelled for the calendar year.
@@ -130,35 +137,21 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 
 ---
 
-## 8. Optional cooling and fan control
+## 8. Selected fan and thermal control
 
-- [ ] Decide from measurements whether active cooling adds value.
-- [ ] Model the **Noctua NF-A4x20 5V PWM fan** (40 × 40 × 20 mm) mounting spot:
-  - Create a **40 × 40 × 22 mm pocket envelope** in the back of the bracket body (inside the ~29.8 mm deep lower cavity).
-  - Verify that the 22 mm allowance is used to clear the fan body plus the vibration-damping silicone corner pads.
-  - Position mounting bosses/screw points for small M3 fan-mounting screws or pins in the rear wall of the bracket.
-- [ ] Design the symmetrical airflow ventilation loop:
-  - Add **hot air exhaust vents** along the top of the bracket faceplate/bezel.
-  - Programmatically pattern the top exhaust vents to perfectly mirror the geometry of the bottom sound return/intake ducts for balanced aesthetics.
-  - Keep the rising exhaust airflow path completely isolated from the separate sound return duct.
-- [ ] Establish bottom-to-top airflow: ensure the fan orientation draws fresh air from the bottom intake, channels it up behind the GPS, and expels it out through the top vents.
-- [ ] Check fan physical clearance around the GPS housing, the right-angle USB elbow, internal wires, and any auxiliary switches/buttons.
-- [ ] Source and wire the **DS18B20 digital 1-Wire temperature sensor**:
-  - Secure a waterproof or TO-92 package DS18B20 sensor.
-  - Solder a **4.7kΩ pull-up resistor** between VDD (3.3V) and DQ (Data - GPIO 4) lines.
-  - Route wires cleanly through the bracket, isolating them from high-vibration spots.
-  - Position the sensor tip close to the GPS's upper rear exhaust zone inside the bracket pocket.
-- [ ] Connect the **Noctua 4-Pin PWM Fan** directly to the Raspberry Pi:
-  - Connect **Pin 1 (Black/GND)** directly to Pi Ground (GND).
-  - Connect **Pin 2 (Red/5V)** directly to Pi 5V power (Pin 2 or 4).
-  - Connect **Pin 4 (Blue/PWM)** directly to **GPIO 18** (Pin 12) for hardware speed control (no external MOSFET or components needed).
-  - *Optional:* Route Pin 3 (Green/Tachometer) to a GPIO pin with a pull-up if software speed reading is required.
-- [ ] Implement and test the Software Control System under `src/pi/`:
-  - Enable the 1-Wire kernel modules on the Pi (`w1-gpio` and `w1-therm` via `/boot/firmware/config.txt`).
-  - Deploy the automatic temperature daemon script to monitor readings via `/sys/bus/w1/devices/`.
-  - Configure dynamic PWM boundaries: Quiet start at **35.0°C (30% speed)** ramping up linearly to **100% full throttle at 45.0°C**.
-  - Test PWM frequency generation (25kHz) and verify smooth speed ramping under load.
-  - Enable the python script as a background system service (`systemd` daemon) that boots automatically with the Pi.
+- [x] Select the **Noctua NF-A4x20 5V PWM**, four-pin fan, per the user's preference.
+- [ ] Measure the actual fan and verify the [manufacturer dimensions and connection plan](pi-setup.md#selected-fan-and-proposed-interface).
+- [ ] Design a removable v0.4 mount with clearance beyond the padded fan envelope, including wiring, fasteners and airflow. Do not assume a 22 mm pocket is sufficient.
+- [ ] Verify mounting hardware and the complete fit against the GPS, USB elbow, controller and current cavity.
+- [ ] Add top exhaust and lower intake vents with a separate path from the sound duct; check cabin-air access and acoustic effects.
+- [ ] Select and identify the DS18B20 sensors; verify power, pull-ups, placement and cable routing.
+- [ ] Implement bounded reads, CRC/format validation, stale-data detection and sensor-fault reporting.
+- [ ] Choose a hardware PWM backend compatible with the selected Pi/OS and verify 25 kHz timing under load. `RPi.GPIO.PWM()` is not hardware PWM.
+- [ ] Replace the previous direct-wiring assumption with a verified Pi-compatible PWM interface and protected fan power branch; confirm connector pin numbering.
+- [ ] Configure hysteresis, startup/minimum duty and manual override. Treat the earlier 35–45°C ramp as a provisional bench setting.
+- [ ] Test sensor disconnects, a stuck/crashed output, reboot and supply loss. Software requesting full cooling cannot guarantee cooling after loss of power or control hardware.
+- [ ] Add optional tach feedback; distinguish requested duty from measured speed.
+- [ ] Package the controller with simulation mode, configuration and service management using the [Pi implementation plan](pi-setup.md).
 
 ---
 
@@ -178,10 +171,12 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 - [ ] Configure and test the Display Software on the Pi OS:
   - Enable the I2C interface via `sudo raspi-config` or adding `dtparam=i2c_arm=on` to `/boot/firmware/config.txt`.
   - Verify address detection via `i2cdetect -y 1` (default address should be `0x3C` or `0x3D`).
-  - Install python dependencies: `pip install luma.oled pillow`.
+  - Install tested dependencies in the application virtual environment; select the driver for the actual OLED controller.
   - Deploy the in-cab display monitor python daemon script under `src/pi/`.
   - Hook up system queries inside the script to fetch the current Starlink Wi-Fi SSID, local IP address, and Tailscale VPN status.
   - Integrate variables from the fan controller and physical buttons threads to dynamically update fan speed percentages and switch statuses (GPS/LEDs) on the screen.
+  - Report actual shared state; do not use fixed fan/switch values or label Pi CPU temperature as compartment temperature.
+  - Bound network queries and keep display faults independent of fan control.
   - Set the script to boot on startup as a persistent `systemd` system service.
 
 ---
@@ -195,6 +190,15 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 - [ ] Implement controller software under `src/pi/` when development starts; this remains a planned directory.
 - [ ] If any original Claude prompts, code blocks or turns are missing from the supplied text, append them with their session labels.
 - [ ] Update the mechanical source, exported files and print notes together after measured fit changes.
+
+## 11. v0.4 preparation after test prints
+
+- [ ] Record all four v0.2 fit results and photograph interference points; measure the floor-lip reference, corners, taper and shelf clearance.
+- [ ] Validate the v0.3 front tabs and M2 coupons plus the oval PopSocket geometry.
+- [ ] Confirm actual Pi, fan, OLED, buttons, power hardware and cable envelopes before fixing cutouts.
+- [ ] Create `src/stl/v0.4/` from the accepted dimensions, preserving prior revisions.
+- [ ] Add a removable electronics carrier, fan bracket, separate vents, serviceable wiring and modular display/switch openings.
+- [ ] Keep GPS-dependent fits provisional until the device arrives; validate local coupons before the complete assembly.
 
 ## Fit result record
 
@@ -211,3 +215,4 @@ Copy this table for each test or revision. Blank cells indicate information stil
 | Photos / observations | |
 | Required CAD change | |
 | Retest outcome | |
+

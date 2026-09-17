@@ -81,3 +81,11 @@ Mesh and bed-size checks are recorded separately in mesh_checks.json. These esta
 | insert.stl | 176.5 × 98.0 × 55.0 |
 | faceplate.stl | 176.5 × 92.0 × 6.3 |
 | shelf.stl | 164.5 × 131.0 × 97.9 |
+
+
+
+## Next revision planning
+
+This directory remains the unchanged V3.1 mechanical baseline. The user is currently printing the four v0.2 fit tests; the v0.3 tabs, M2 hardware and oval accessory fit still need their own checks.
+
+The selected future fan is **Noctua NF-A4x20 5V PWM**, four-pin. The selected host is **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite**. Neither component is fitted or modeled by this revision. Use the [Pi setup and v0.4 plan](../../../docs/pi-setup.md) for its envelope, interface, component measurements and ventilation requirements. Do not interpret the earlier 22 mm pocket proposal as verified installation clearance. Create v0.4 after the fit results and actual component dimensions are available.

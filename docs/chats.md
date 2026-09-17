@@ -26,6 +26,7 @@ Speaker labels and headings were added for navigation. Formatting was adapted to
 - [Attachment inventory](#attachment-inventory)
 - [Repository layout clarification](#repository-layout-clarification)
 - [Repository URL correction and rename](#repository-url-correction-and-rename)
+- [Fit-test progress and Pi planning decisions](#fit-test-progress-and-pi-planning-decisions)
 
 ## Repository session mapping
 
@@ -618,3 +619,122 @@ Access works now. The repository already contains our documents, plus newer tele
 I’ll preserve those newer plans and make a focused documentation update: fix links and session paths, distinguish the existing prototype from planned software, and add the repository rename to the chat record.
 
 Archive update: the repository URL correction, rename and access result are included above. The older archive cutoff refers to the previous snapshot; all earlier supplied Claude response passages remain intact.
+
+
+
+## Fit-test progress and Pi planning decisions
+
+### User
+
+merged
+
+### Assistant
+
+Great—those documentation updates are now in the main branch. We can use `truck-gps` as the working project record going forward.
+
+### User
+
+right now i am printing the 4 test files from v0.2
+
+### Assistant
+
+Good—those v0.2 tests will help establish the truck fit. Record these results:
+
+| Test | What to check |
+|---|---|
+| Face frame | Opening, corners and floor ridges. Measure height from the **top of the black floor lip**, not the gray trim. |
+| Depth gauges | Both seat with **FRONT flush**, without forcing; check the top bar and side-wall taper. |
+| Bolt trap | Actual bolt head fits without spinning; shank passes through. |
+| Shelf pockets | AirPods fit with the **Latercase installed**. The round PopGrip pocket won’t validate your oval PopSocket. |
+
+Take photos of any tight areas and measure gaps where possible. These tests won’t check the newer v0.3 faceplate tabs or M2 nut pockets—we’ll test those separately. GPS fit can wait until it arrives.
+
+### User
+
+can you review my src/pi and see what code i need to setup for when i get to the pi, once finished with these test pieces, we can start to build the v0.4 files we need
+
+### Assistant review
+
+I reviewed the current `main` branch. **There’s no `src/pi` code committed yet**—the fan and OLED examples are still inside the [README](https://github.com/nuniesmith/truck-gps/blob/f8075d72dddf59a85583dda3cea287938e356ffc/README.md). They’re useful starting points, but need corrections before running on hardware.
+
+**The main issues I found:**
+
+| Issue | What needs changing |
+|---|---|
+| Missing temperature sensor crashes the example | `read_temp_raw()` returns an empty string, then `read_temp()` indexes it. Handle missing, disconnected and malformed sensors explicitly. |
+| Sensor retries can run forever | The CRC retry loop needs a timeout. A failed reading should produce a fault state, not `0°C`, which currently turns cooling off. |
+| Fan control is described as hardware PWM but uses software PWM | `RPi.GPIO.PWM()` does not enable hardware PWM simply because it uses GPIO18. Choose a hardware PWM implementation compatible with the selected Pi and OS. [RPi.GPIO documentation](https://pypi.org/project/RPi.GPIO/) |
+| Wiring diagram is ambiguous | The fan PWM line appears joined to the ground line. Replace it with a clear connection table and verify the selected fan’s electrical interface. Noctua specifies a **25 kHz target**. [Noctua PWM specifications](https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf) |
+| OLED reports invented operating states | Fan speed is fixed at `"45%"`, GPS at `"ON"`, and LEDs at `"OFF"`. Its temperature is the Pi CPU temperature, not the GPS compartment. Display actual controller state and label temperatures separately. |
+| Power-off behavior isn’t implemented | A Linux Pi needs a shutdown/power-loss plan. A GPIO button alone cannot maintain power long enough to finish shutdown. |
+| GPS tracking input is unresolved | The repository hasn’t established that the OTR620 provides a usable live position stream. Plan around a supported GNSS receiver unless we verify a Garmin interface. |
+
+The README also switches between **10 mm and 20 mm fans**. We need one exact model before designing its v0.4 mount.
+
+For your SSH, Tailscale and home-map plans, my starting choice would be a **Pi Zero 2 W running Raspberry Pi OS Lite**. A Pico could remain an optional accessory controller later. The Zero 2 W has **2.4 GHz Wi-Fi and micro-USB connectors**, which matters for both Starlink connectivity and our mounting layout. [Raspberry Pi specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
+
+The first software milestone should contain these pieces:
+
+| Proposed file under `src/pi/` | Purpose |
+|---|---|
+| `README.md` | Installation, wiring, first boot and troubleshooting |
+| `pyproject.toml` | Dependencies and application entry point |
+| `config.example.toml` | Pin assignments, sensor ID, thresholds and enabled accessories |
+| `truck_gps/sensors.py` | Temperature readings with timeouts and fault reporting |
+| `truck_gps/controller.py` | Fan curve, hysteresis, LED brightness and button handling |
+| `truck_gps/hardware.py` | Hardware adapters plus a simulated mode for laptop testing |
+| `truck_gps/display.py` | OLED showing real state; display failure must not stop cooling |
+| `truck_gps/main.py` | Startup, logging, shutdown and shared application state |
+| `systemd/truck-gps.service` | Automatic startup and restart after failure |
+| `tests/` | Sensor disconnects, invalid readings, fan thresholds and restart behavior |
+
+**When the Pi arrives**, the setup sequence should be:
+
+1. Install OS Lite with Wi-Fi and SSH configured through Raspberry Pi Imager. [Official setup guide](https://www.raspberrypi.com/documentation/computers/getting-started.html)
+2. Configure Tailscale and verify remote access. [Linux installation guide](https://tailscale.com/docs/install/linux)
+3. Enable I²C and 1-Wire, then test the temperature sensor and OLED individually.
+4. Test fan control and LEDs on the bench.
+5. Install the service and test sensor disconnection, reboot and network loss.
+6. Add location logging and the home-map service afterward.
+
+For **v0.4**, your current v0.2 test prints will establish the cubby, depth and accessory corrections. We’ll also need the newer faceplate/nut-pocket tests and actual dimensions of the Pi, fan, display, switches and power hardware. That gives us enough to design the electronics carrier and revised faceplate without guessing cutouts.
+
+This was a review of the committed examples; I haven’t changed code or created v0.4 files.
+
+### User
+
+for the fan id rather use the 20mm one since its PWM and we can get the 4 pin and control the speed too
+
+### Assistant
+
+We’ll use the **Noctua NF-A4x20 5V PWM**, the **40 × 40 × 20 mm, four-pin version**, as the planned fan.
+
+For v0.4, we’ll provide:
+
+- Adjustable mounting clearance for its pads, connector and wiring.
+- A ventilation path separate from the speaker duct.
+- Temperature-based speed control and a manual override.
+
+The previously proposed **22 mm pocket depth remains provisional** until we verify the fan’s full envelope and airflow clearance. Make sure the selected model says **5V PWM**.
+
+### User
+
+can you update all the docs and push to main and open a pr
+
+### Assistant progress
+
+I’ll update the current documentation with the selected 20 mm, four-pin 5V PWM fan and the Pi setup findings. I’ll open a PR for the changes, then merge it into `main` so the update has a review record.
+
+Noctua lists the selected fan as 40 × 40 × 20 mm, or 22 mm thick with its pads. That means 22 mm is the fan’s physical envelope; the mount still needs additional fit and airflow clearance.
+
+I’m correcting the fan references and wiring guidance, recording the Pi code issues, and adding a setup plan and v0.4 checklist based on the measurements we still need.
+
+### User
+
+update for the future to use the pi zero, so we can get a full OS with all the features and still setup the low level things we need to do
+
+### Assistant progress
+
+I’ll make the **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite** the selected host. That gives us Linux for SSH, Tailscale and the web services, plus GPIO, I²C, 1-Wire and a verified hardware PWM setup for accessory control. I’ll include that decision in this update.
+
+Archive note: the final host decision above supersedes the earlier Pico/Zero comparison. The hardware PWM backend is a requirement still to implement and verify, not working code. See [the current setup plan](pi-setup.md).

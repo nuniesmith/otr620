@@ -16,3 +16,11 @@ Another idea, with the pi having gps data and tracking it, i would like to setup
 update the docs to include the new structure of dirs for this repo and changed the name to truck-gps to be more generic. We can put any pi code under src/pi and stl files for 3d printer code under src/stl.
 
 Review the pdf's under doc and convert them into their own md file, then we can delete the pdf's.
+
+
+
+## Current decisions following the Pi review
+
+The raw notes above remain the original ideas. The current selected fan is the **Noctua NF-A4x20 5V PWM**, four-pin. Its mount and ventilation remain v0.4 work pending fit tests and actual hardware dimensions. See [Pi setup and implementation](pi-setup.md) for the verified fan table and review findings.
+
+The selected Linux host is **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite**, confirmed by the user for a full OS and low-level peripheral control. Accessories draw from rated power-distribution hardware, not Pi GPIO. The GPS's suggested 5 V/1 A demand and a live Garmin position interface remain unverified. Begin with direct Garmin power, then bench-test accessory control. The four v0.2 test prints are in progress; v0.4 CAD has not started.
