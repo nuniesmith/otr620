@@ -1,10 +1,10 @@
 # OTR620 chats and prompts
 
-[Current design](README.md) · [Tasks](todo.md)
+[Current design](../README.md) · [Tasks](todo.md)
 
 ## Archive scope and completeness
 
-This file preserves the available user messages, substantive ChatGPT responses and user-facing progress updates recorded in `Garmin_OTR620_Project_Record.docx`, followed by the documentation exchanges. The user-supplied Claude response text for v0.1 and v0.2 is placed before the ChatGPT archive so the design history can be read in session order. Historical wording and proposals are retained; use `README.md` for the current V3.1 baseline.
+This file preserves the available user messages, substantive ChatGPT responses and user-facing progress updates recorded in `Garmin_OTR620_Project_Record.docx`, followed by the documentation exchanges. The user-supplied Claude response text for v0.1 and v0.2 is placed before the ChatGPT archive so the design history can be read in session order. Historical wording and proposals are retained; use [the project README](../README.md) for current plans and [the V3.1 print instructions](../src/stl/v0.3/README.md) for the mechanical baseline.
 
 **Claude coverage now includes all response text pasted by the user for v0.1 and v0.2.** The [Claude share](https://claude.ai/share/05fdda11-3323-4d7f-8862-223c79cbf0eb) could not be retrieved directly. The earlier user-pasted prompts remain in the “Starting the design and supplying the Claude prompts” section. The newly supplied passages include Claude progress text and final replies, but no complete raw export or exact turn-by-turn prompt pairing was supplied. Nothing missing has been reconstructed. Earlier statements that Claude replies were unavailable are preserved as historical messages.
 
@@ -25,22 +25,23 @@ Speaker labels and headings were added for navigation. Formatting was adapted to
 - [Request for repository Markdown files](#request-for-repository-markdown-files)
 - [Attachment inventory](#attachment-inventory)
 - [Repository layout clarification](#repository-layout-clarification)
+- [Repository URL correction and rename](#repository-url-correction-and-rename)
 
 ## Repository session mapping
 
 | Directory | Conversation source | Available coverage |
 |---|---|---|
-| `src/v0.1` | First Claude session | User-pasted response text preserved below |
-| `src/v0.2` | Second Claude session | User-pasted response text preserved below |
-| `src/v0.3` | This ChatGPT session | Available discussion preserved below |
+| [`src/stl/v0.1`](../src/stl/v0.1) | First Claude session | User-pasted response text preserved below |
+| [`src/stl/v0.2`](../src/stl/v0.2) | Second Claude session | User-pasted response text preserved below |
+| [`src/stl/v0.3`](../src/stl/v0.3) | This ChatGPT session | Available discussion preserved below |
 
 The user confirmed this mapping after the initial Markdown split, then supplied two blocks of Claude text. The first block is recorded as v0.1 because the second is explicitly introduced as “now for v0.2”. The older prompts and shared URL have not been assigned to a specific Claude session. A renewed attempt to open the public share returned a web-reader error without page content; this does not establish that the page requires login.
 
-The CAD revision names in historical messages remain unchanged: the V3.1 prototype belongs to the `src/v0.3` session.
+Current repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps). Access and the `src/stl/v0.1`, `src/stl/v0.2` and `src/stl/v0.3` directories were verified after the rename. Earlier paths, failed-access reports and repository URLs in the messages below are historical. The CAD revision names remain unchanged: the V3.1 prototype belongs to the `src/stl/v0.3` session.
 
 ## Claude session v0.1
 
-Repository directory: `src/v0.1`. Source: text pasted by the user after providing the repository URL. The concatenated progress text, wording, dimensions and historical claims are preserved as supplied. No exact message boundaries have been invented.
+Current repository directory: `src/stl/v0.1` (originally described as `src/v0.1`). Source: text pasted by the user after providing the repository URL. The concatenated progress text, wording, dimensions and historical claims are preserved as supplied. No exact message boundaries have been invented.
 
 ### Claude response text supplied by the user
 
@@ -75,7 +76,7 @@ Tell me what the gauges show and I'll adjust the model. Files are below; the pre
 
 ## Claude session v0.2
 
-Repository directory: `src/v0.2`. The user introduced this block with the exact text: “now for v0.2”.
+Current repository directory: `src/stl/v0.2` (originally described as `src/v0.2`). The user introduced this block with the exact text: “now for v0.2”.
 
 ### Claude response text supplied by the user
 
@@ -125,7 +126,7 @@ Tell me what the tests show and I'll adjust the numbers. Files are below.
 
 ## ChatGPT session v0.3
 
-Repository directory: `src/v0.3`. The existing ChatGPT record follows. Claude passages appear above in session order even though they were pasted later in this conversation.
+Current repository directory: `src/stl/v0.3` (originally described as `src/v0.3`). The existing ChatGPT record follows. Claude passages appear above in session order even though they were pasted later in this conversation.
 
 ## Initial review request
 
@@ -579,3 +580,41 @@ The GitHub plugin returned “Not Found” for `nuniesmith/otr620repo`, so I hav
 The Claude notes add a key fit check: measure the cubby height from the top of the black floor lip. They also describe the older friction-fit GPS retention and round PopGrip pocket, which I’ll preserve as historical designs alongside the later changes.
 
 Archive cutoff: the supplied Claude response blocks, repository URL and progress updates above. All supplied Claude response text is included; any additional original prompts, code blocks or omitted turns can be appended with their session labels when available.
+
+
+
+## Repository URL correction and rename
+
+### Assistant delivery after integrating Claude text
+
+Updated all three files with the supplied Claude text:
+
+- README.md — design history and recovered fit checks.
+- chats.md — both Claude blocks preserved in full under `v0.1` and `v0.2`, alongside this ChatGPT session.
+- todo.md — updated tasks and measurements.
+
+GitHub returned “Not Found” for `nuniesmith/otr620repo`, so no repository changes were made. Please confirm the URL and, if it’s private, that the GitHub connection has access.
+
+### User
+
+https://github.com/nuniesmith/otr620.git
+
+### Assistant progress
+
+I’ll check `nuniesmith/otr620`, compare its documentation with our updated files, and prepare the changes on a review branch.
+
+### User
+
+@GitHub i changed the name to truck-gps on my nuniesmith account
+
+https://github.com/nuniesmith/truck-gps.git
+
+### Assistant progress
+
+I’ll use `nuniesmith/truck-gps` and continue preparing the documentation changes there.
+
+Access works now. The repository already contains our documents, plus newer telemetry, cooling, and OLED plans. The model folders are now under `src/stl/v0.1` through `src/stl/v0.3`.
+
+I’ll preserve those newer plans and make a focused documentation update: fix links and session paths, distinguish the existing prototype from planned software, and add the repository rename to the chat record.
+
+Archive update: the repository URL correction, rename and access result are included above. The older archive cutoff refers to the previous snapshot; all earlier supplied Claude response passages remain intact.

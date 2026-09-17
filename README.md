@@ -4,6 +4,10 @@ A modular, parametric mount for the upper dash cubby in a **2022 Volvo VNL 860**
 
 This repository, formerly specific to the OTR620, has been restructured into a generic **`truck-gps`** project to host both mechanical (STL/CAD) files and software (Raspberry Pi/telemetry) code.
 
+**Current status:** the repository contains the V3.1 mechanical fit prototype and earlier CAD sessions. Physical fit testing remains pending. Telemetry, controller software, the OLED display and revised cooling/power hardware are plans; `src/pi/` has not been created yet. The code snippets and wiring proposals below are design notes awaiting implementation and validation.
+
+Repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps).
+
 ---
 
 ## Documentation Index
@@ -11,6 +15,8 @@ This repository, formerly specific to the OTR620, has been restructured into a g
 - [README.md](README.md): Project overview, directory structure, system architecture, and electrical planning.
 - [docs/todo.md](docs/todo.md): Master planning, task tracking, measurements, and physical test records.
 - [docs/chats.md](docs/chats.md): Historical session logs (v0.1, v0.2, and v0.3) preserving earlier design rationale and prompts.
+- [src/stl/v0.3/README.md](src/stl/v0.3/README.md): Current V3.1 print sequence, hardware, assembly and OpenSCAD export instructions.
+- [docs/notes.md](docs/notes.md): Raw project ideas and planning notes.
 - [docs/tomtom-api.md](docs/tomtom-api.md): TomTom Orbis Map, Routing, and Traffic API free tier and integration details.
 - [docs/google-maps-api.md](docs/google-maps-api.md): Google Maps Platform free tier, Essentials, and Pro API configurations.
 
@@ -27,12 +33,26 @@ truck-gps/
 │   ├── tomtom-api.md       # TomTom Orbis & legacy Maps pricing/specs
 │   └── google-maps-api.md  # Google Maps pricing and capability reference
 └── src/                    # Source code and physical designs
-    ├── pi/                 # Python/C code, telemetry, Tailscale configs, and system scripts
+    ├── pi/                 # Planned; no controller or telemetry source files yet
     └── stl/                # 3D printer files (OpenSCAD & STLs grouped by design versions)
         ├── v0.1/           # First-generation design files
         ├── v0.2/           # Second-generation design files
         └── v0.3/           # V3.1 parametric mount & coupon test models
 ```
+
+### Design sessions
+
+| Directory | Origin | Role |
+|---|---|---|
+| [src/stl/v0.1](src/stl/v0.1) | First Claude session | Original insert and fit tests |
+| [src/stl/v0.2](src/stl/v0.2) | Second Claude session | Rubber pads and accessory shelf |
+| [src/stl/v0.3](src/stl/v0.3) | This ChatGPT session | V3.1 faceplate hardware, revised shelf and 12 STL files |
+
+The session directory `v0.3` contains the CAD revision named **V3.1**; these are different naming schemes. Earlier `src/v0.x` paths and repository names in [the chat archive](docs/chats.md) are historical. Use the current paths above when locating files.
+
+### First print checks
+
+Start with [the V3.1 printing instructions](src/stl/v0.3/README.md#print-now-without-the-gps) and record results in [the task checklist](docs/todo.md#1-truck-and-accessory-tests--next-work). Print the truck frame, depth gauges, M2 hardware coupons and accessory outlines before the full assembly. The GPS housing, rear ports, gasket overlap and power requirements remain provisional until verified on the actual unit.
 
 ---
 

@@ -1,6 +1,6 @@
 # OTR620 & Truck GPS Master Plan
 
-[Current design](README.md) · [Conversation archive](chats.md) · [TomTom API](tomtom-api.md) · [Google Maps API](google-maps-api.md)
+[Current design](../README.md) · [V3.1 print instructions](../src/stl/v0.3/README.md) · [Conversation archive](chats.md) · [TomTom API](tomtom-api.md) · [Google Maps API](google-maps-api.md)
 
 Baseline: **V3.1 fit prototype**, September 17, 2026. Checked items reflect work recorded in the session. Unchecked items have no recorded completion. Electrical values and unmeasured fit dimensions are provisional. No deadlines have been agreed.
 
@@ -185,6 +185,16 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
   - Set the script to boot on startup as a persistent `systemd` system service.
 
 ---
+
+## 10. Repository and archive maintenance
+
+- [x] Confirm access to [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps) through the GitHub connection.
+- [x] Verify the three model directories under `src/stl/` and the V3.1 source, 12 STLs, hardware image and mesh report under `src/stl/v0.3/`.
+- [x] Preserve the supplied Claude v0.1/v0.2 responses and available ChatGPT discussion in `docs/chats.md`.
+- [x] Preserve the newer telemetry, cooling and OLED plans while reconciling documentation links and current session paths.
+- [ ] Implement controller software under `src/pi/` when development starts; this remains a planned directory.
+- [ ] If any original Claude prompts, code blocks or turns are missing from the supplied text, append them with their session labels.
+- [ ] Update the mechanical source, exported files and print notes together after measured fit changes.
 
 ## Fit result record
 
