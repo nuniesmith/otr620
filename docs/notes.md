@@ -9,5 +9,8 @@ Go over the pros and cons of having 1 or 2 usb c cables into the back of the bra
 
 Google also has a free tier with their maps api, so we could build different map apis and use them on the free tier and also get differet sources for live traffic.
 
-Another idea, with the pi having gps data and tracking it, i would like to setup a physical map of canada and USA at home for the wife, this would have a little truck on the map of where i am in real time. At home, something like a small tv/monitor with another pi to hdmi would work fine i am sure.
+Another idea, with the pi having gps data and tracking it, i would like to setup a physical map of canada and USA at home for the wife, this would have a little truck on the map of where i am in real time. At home, something like a small tv/monitor with another pi to hdmi would work fine i am sure. Since everything has tailscale on it, i am sure the pi pico will have tailscale if possible. Making it easy to using client devices to lookup a webpage over tailscale to view the map with live real-time location of my truck.
 
+update the docs to include the new structure of dirs for this repo and changed the name to truck-gps to be more generic. We can put any pi code under src/pi and stl files for 3d printer code under src/stl.
+
+Review the pdf's under doc and convert them into their own md file, then we can delete the pdf's.

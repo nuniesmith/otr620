@@ -1,8 +1,10 @@
-# OTR620 tasks
+# OTR620 & Truck GPS Master Plan
 
-[Current design](README.md) · [Conversation archive](chats.md)
+[Current design](README.md) · [Conversation archive](chats.md) · [TomTom API](tomtom-api.md) · [Google Maps API](google-maps-api.md)
 
 Baseline: **V3.1 fit prototype**, September 17, 2026. Checked items reflect work recorded in the session. Unchecked items have no recorded completion. Electrical values and unmeasured fit dimensions are provisional. No deadlines have been agreed.
+
+---
 
 ## Completed design and documentation work
 
@@ -16,6 +18,10 @@ Baseline: **V3.1 fit prototype**, September 17, 2026. Checked items reflect work
 - [x] Record a faceplate clearance check with intended contact surfaces slightly separated.
 - [x] Document the staged power, lighting, charging and cooling concepts.
 - [x] Create the Word project record and split it into README.md, chats.md and todo.md.
+- [x] Convert Google Maps and TomTom API PDF specifications into standard markdown (`docs/google-maps-api.md`, `docs/tomtom-api.md`) and clean up PDFs.
+- [x] Restructure and rename repository to `truck-gps` and map future source code to `src/pi/` and 3D printing components to `src/stl/`.
+
+---
 
 ## 1. Truck and accessory tests — next work
 
@@ -25,19 +31,19 @@ Goal: verify the truck and accessories before committing to the full print; the 
 - [ ] Select the final dashboard material based on printer capability and heat performance; keep mockup and final-material results distinct.
 - [ ] Inspect each test in the slicer at 100% scale; check clips, exclusion zones, purge lines, support footprint and brim clearance.
 - [ ] Remeasure opening height from the cubby floor/top of the black front lip to the opening top; record lip height separately from gray trim. The earlier approximately 8 mm discrepancy was a photo estimate.
-- [ ] Print `truck_fit_frame.stl`; check opening, corner radii, floor ridges and trim behind the wider mounting tabs.
-- [ ] Print `fit_gauge.stl`; check depth, taper and the top-bar step against the stated 25.4/50.8 mm depths.
+- [ ] Print `src/stl/v0.3/truck_fit_frame.stl`; check opening, corner radii, floor ridges and trim behind the wider mounting tabs.
+- [ ] Print `src/stl/v0.3/fit_gauge.stl`; check depth, taper and the top-bar step against the stated 25.4/50.8 mm depths.
 - [ ] Determine whether to remove the existing ball mount or revise geometry to clear it.
-- [ ] Print `dash_bolt_test.stl`; measure actual dash bolts and confirm head/shank fit, rear access and installation hardware. These are separate from the small M2 faceplate screws.
-- [ ] Print `nut_fit_test.stl` and `bolt_cover_test.stl`; compare 4.1/4.3/4.5 mm nut allowances with actual hardware.
+- [ ] Print `src/stl/v0.3/dash_bolt_test.stl`; measure actual dash bolts and confirm head/shank fit, rear access and installation hardware. These are separate from the small M2 faceplate screws.
+- [ ] Print `src/stl/v0.3/nut_fit_test.stl` and `src/stl/v0.3/bolt_cover_test.stl`; compare 4.1/4.3/4.5 mm nut allowances with actual hardware.
 - [ ] Verify screw reach and repeated faceplate removal; settle how nuts remain in the open loading slots when screws are absent.
-- [ ] Measure rubber thickness including adhesive and its compressed thickness; test `pad_test.stl` with a measured 20 mm block.
+- [ ] Measure rubber thickness including adhesive and its compressed thickness; test `src/stl/v0.3/pad_test.stl` with a measured 20 mm block.
 - [ ] Test adhesive compatibility with the rubber and chosen print material.
-- [ ] Print `accessory_test.stl` with the Latercase installed; measure AirPods case-on width, height and depth, and PopSocket length, width and thickness.
+- [ ] Print `src/stl/v0.3/accessory_test.stl` with the Latercase installed; measure AirPods case-on width, height and depth, and PopSocket length, width and thickness.
 - [ ] Check the shelf reach with a cardboard profile: approximately 80.1 mm forward and 73.9 mm below the cubby.
 - [ ] Record photos and measured tight/loose areas, then revise CAD parameters and reprint affected coupons.
 
-Completion criterion: measured truck, hardware, pad and accessory results are recorded; the shelf clears nearby controls and trim.
+---
 
 ## 2. GPS verification — when the unit arrives
 
@@ -53,92 +59,85 @@ Completion criterion: measured truck, hardware, pad and accessory results are re
 - [ ] Revise the USB clearance pocket and add a removable cable-jacket clamp if needed, keeping slack at the connector.
 - [ ] Read GPS/adapter labels and verify operating voltage and charging demand with navigation running and a partly discharged battery. Do not adopt 5 V/1 A as a confirmed rating.
 
-Completion criterion: GPS housing, bezel, ports, cable envelope and electrical requirements have been verified with the actual hardware.
+---
 
 ## 3. Mechanical assembly and validation
 
 - [ ] Recheck thin sections near tongue channels and rear microphone routing before adding holes, latch roots or electronics mounts.
-- [ ] Slice `insert.stl`, `faceplate.stl` and `shelf.stl`; inspect the insert step, nut tabs, tongues, supports and print orientation.
+- [ ] Slice `src/stl/v0.3/insert.stl`, `src/stl/v0.3/faceplate.stl` and `src/stl/v0.3/shelf.stl`; inspect the insert step, nut tabs, tongues, supports and print orientation.
 - [ ] Assemble using measured dash hardware and tested M2 fasteners; verify the lower bolts clamp the shelf tongues/L-tabs as intended.
 - [ ] Confirm the 176.5 mm tab width and 6.6 mm faceplate projection plus screw heads clear the actual dashboard.
 - [ ] Confirm comfortable GPS insertion/removal and repeatable screw/nut service without excessive pad compression.
 - [ ] Check AirPods lid opening, retrieval, upward-facing orientation and future charging-cable access.
-- [ ] Test steel target or matching magnets against the actual PopSocket before selecting the insert or adhesive.
-- [ ] Evaluate AirPods and PopSocket retention; add a strap, latch or retaining feature if tray lips/magnetic attraction are insufficient.
 - [ ] Compare rear-speaker sound with and without the return duct; check for muffling and rattles.
 - [ ] Verify microphone, controls, SD access, GPS reception and charging while stationary.
 - [ ] Evaluate retention, fastener loosening, pad creep and thermal deformation before relying on the assembly during normal driving.
 - [ ] Revise and export affected parts; update CAD check results for the revision actually being printed.
 
-## 4. Initial operation — direct GPS power
+---
 
-- [ ] Install the GPS using its supplied power arrangement and secured cable route.
-- [ ] Bench-check startup and behavior when external power is removed/restored; decide whether ignition-switched power is appropriate.
-- [ ] Confirm access to the rear power key/reset procedure and microSD card with the chosen faceplate and removal method.
-- [ ] Record GPS compartment, cabin and shelf temperatures under representative use, including sunlight exposure.
-- [ ] Check sustained navigation and charging for resets, intermittent power or cable strain.
-- [ ] Use the measurements to decide whether ventilation or a fan is needed before adding heat-producing accessories.
+## 4. Power & Front Bracket Switches Planning
 
-## 5. Modular power and dim blue lighting
+- [ ] Finalize power strategy: evaluate Single USB-C PD Input (using 9V or 12V PD contract stepped down to 5V @ 4A with internal buck converter) vs. Dual USB-C Input (independent cables for GPS and auxiliary boards).
+- [ ] Design the front switch/button layout on the bracket to house four physical power control toggles:
+  1. **Master Power** (isolates the whole system).
+  2. **GPS Power** (enables/disables Garmin OTR620 supply).
+  3. **Blue LEDs Power** (manual control of ambient bracket lighting).
+  4. **Cooling Fan Power** (manual override / auto toggle for compartment fan).
+- [ ] Select appropriate panel-mount miniature toggle or tactile push buttons matching the front depth and width clearances.
+- [ ] Ensure power wiring route stays clear of the speaker duct and mechanical stress points during faceplate removal.
 
-Dependency: verified device requirements and real component dimensions. The session's 5 V/4 A combined target is an allowance, not a finalized design.
+---
 
-- [ ] Select the automotive power source and supported output contract; evaluate the proposed 9 V/3 A USB-C PD architecture.
-- [ ] Recalculate load and conversion-loss budgets from selected hardware, including startup demand and continuous operation.
-- [ ] Select a rated converter and protected branches; define behavior for unsupported PD contracts, input faults and overloads.
-- [ ] Select USB-C input/output hardware with correct source/sink roles, connection detection and advertised current.
-- [ ] Keep GPS power independent of Pico software and accessory switching.
-- [ ] Draw the wiring schematic and record component ratings, connectors, wiring and protection in a bill of materials.
-- [ ] Design a removable electronics carrier, cable channels and accessible service connections around selected components.
-- [ ] Select two diffused blue LEDs, one resistor per LED and a front switch for lighting only; finalize a switch boss without weakening the GPS surround.
-- [ ] Test `led_carrier.stl`; aim LEDs at an internal surface and keep wiring clear of the sound path.
-- [ ] Test brightness at night and adjust resistor values; add dimming only if useful. A capacitor does not set steady LED brightness.
-- [ ] Bench-test regulation, combined loads, switching and temperatures before installing accessory electronics.
+## 5. Telemetry & Web Tracking System
 
-## 6. AirPods wired charging first
+Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to track physical coordinates and display them on a real-time map at home.
 
-- [ ] Select a suitable shelf USB-C output and short approximately 0.5 ft angled USB-C cable.
+- [ ] Select the controller board: compare Raspberry Pi Zero 2W (supports native Linux, standard Python, full Tailscale client, web hosting) against Pi Pico 2W (lightweight but extremely difficult network stack).
+- [ ] Install **Tailscale** on the selected in-cab Pi; verify connection through the truck's Starlink Wi-Fi.
+- [ ] Write a telemetry background service under `src/pi/` to:
+  * Read NMEA GPS data from a connected GPS receiver module.
+  * Keep track of cumulative km/miles travelled for the calendar year.
+  * Maintain a local JSON database logging states, provinces, and countries visited.
+- [ ] Develop a lightweight web dashboard under `src/pi/` (using Python FastAPI/Flask) that:
+  * Serves a real-time interactive map showing the truck's current position.
+  * Connects to map and traffic engines on free tiers (see [docs/tomtom-api.md](tomtom-api.md) and [docs/google-maps-api.md](google-maps-api.md)).
+  * Overlays real-time traffic updates from TomTom Orbis Traffic API on the route.
+- [ ] Setup the Home Display System:
+  * Configure a secondary Raspberry Pi connected via HDMI to a television or small monitor at home.
+  * Install Tailscale on the Home Pi.
+  * Configure the Home Pi to boot directly into a browser loading the in-cab Pi's private Tailscale IP webpage (e.g., `http://100.x.y.z/map`).
+  * Verify live telemetry reporting and automatic page refreshes.
+
+---
+
+## 6. Modular lighting and wired charging
+
+- [ ] Select two diffused blue LEDs, one resistor per LED, and wire them to the dedicated front button on the faceplate.
+- [ ] Test `src/stl/v0.3/led_carrier.stl`; aim LEDs at an internal surface and keep wiring clear of the sound path.
+- [ ] Select a suitable shelf USB-C output and short approximately 0.5 ft angled USB-C cable for wired AirPods charging.
 - [ ] Check connector access and bend clearance with the Latercase installed and AirPods in the tray.
-- [ ] Add a blankable shelf port opening and interchangeable tray backing using actual hardware dimensions.
 - [ ] Verify simultaneous GPS and AirPods charging under the expected load and temperature conditions.
+
+---
 
 ## 7. Optional wireless charging
 
-- [ ] Select a complete compatible charging puck and test it through the Latercase before designing its recess.
+- [ ] Select a complete compatible charging puck and test it through the Latercase before designing its recess in the shelf.
 - [ ] Check alignment, charging stability and temperature with the case at the intended 45° angle.
 - [ ] Design a removable puck backing with minimal extra plastic between charger and case.
-- [ ] Keep the PopSocket steel target and magnets outside the charging area.
 - [ ] Verify the charger cable remains accessible and the holder still supports easy AirPods removal.
-- [ ] Compare temperatures with wired charging; retain the wired option if wireless heat or alignment is unacceptable.
 
-## 8. Optional cooling and Pico control
+---
+
+## 8. Optional cooling and fan control
 
 - [ ] Decide from measurements whether active cooling adds value.
-- [ ] If needed, design a ventilation path reaching cabin air, preferably separate from the speaker duct.
-- [ ] Evaluate lower intake/upper exhaust for passive flow and the proposed top-intake/bottom-exhaust route for forced flow.
-- [ ] If using the Noctua NF-A4x10 5V, allow a 40 × 40 mm footprint and verify actual thickness with pads. The existing 39.4 mm sound opening needs revision.
+- [ ] If using the Noctua NF-A4x10 5V, allow a 40 × 40 mm footprint and verify actual thickness with pads.
 - [ ] Check fan clearance around the GPS, USB elbow, wiring and electronics; measure acoustic interference and airflow after assembly.
-- [ ] Select external GPS/charger temperature sensors and define measurement locations and control thresholds.
-- [ ] Select a Pico and suitable MOSFETs/load switches; power loads from the distribution hardware rather than GPIO.
-- [ ] Implement saved LED brightness and PWM dimming if selected.
-- [ ] Implement temperature monitoring, fan hysteresis and charger overtemperature shutdown if those options are installed.
-- [ ] Verify sensor-failure, controller-reset and startup behavior while keeping the GPS branch independent.
+- [ ] Implement temperature monitoring, fan hysteresis and charger overtemperature shutdown.
 
-## 9. Repository and archive maintenance
-
-- [x] Record the user-confirmed directory mapping: `src/v0.1` and `src/v0.2` are Claude sessions; `src/v0.3` is this ChatGPT session.
-- [x] Receive the repository URL: [nuniesmith/otr620repo](https://github.com/nuniesmith/otr620repo).
-- [ ] Resolve repository access or confirm the URL; the GitHub plugin returned `Not Found`, so no repository files have been inspected.
-- [ ] Inspect existing repository files before choosing documentation placement or changing links.
-- [ ] Add the updated three Markdown files to `nuniesmith/otr620repo` after repository access and target paths are established.
-- [ ] Check that the current V3.1 source, 12 STLs, hardware image and CAD check report are organized under `src/v0.3`; preserve the Claude session files under `src/v0.1` and `src/v0.2`.
-- [ ] Preserve the original prototype package's printing and assembly notes when integrating this top-level README.
-- [x] Preserve all supplied first Claude response text under the `src/v0.1` session section in `chats.md`.
-- [x] Preserve all supplied second Claude response text under the `src/v0.2` session section in `chats.md`.
-- [ ] If any original Claude prompts, code blocks or turns remain outside the supplied text, append them with session labels; do not infer missing turn boundaries.
-- [ ] Confirm which Claude session corresponds to the supplied share URL and previously pasted prompts. The public share still could not be retrieved by the web reader.
-- [ ] Add measured dimensions, print settings, fit photos and hardware details as results become available.
-- [ ] Track implementation separately from proposed features; update README and tasks after each accepted revision.
+---
 
 ## Fit result record
 
