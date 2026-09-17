@@ -4,7 +4,7 @@ A modular, parametric mount for the upper dash cubby in a **2022 Volvo VNL 860**
 
 This repository, formerly specific to the OTR620, has been restructured into a generic **`truck-gps`** project to host both mechanical (STL/CAD) files and software (Raspberry Pi/telemetry) code.
 
-**Current status:** the repository contains the V3.1 mechanical fit prototype and earlier CAD sessions. Physical fit testing remains pending. Telemetry, controller software, the OLED display and revised cooling/power hardware are plans; `src/pi/` has not been created yet. The code snippets and wiring proposals below are design notes awaiting implementation and validation.
+**Current status:** the repository contains the V3.1 mechanical fit prototype and earlier CAD sessions. The four v0.2 test pieces are currently being printed; physical fit results remain pending. Telemetry, controller software, the OLED display and revised cooling/power hardware are plans; `src/pi/` has not been created yet. The code snippets and wiring proposals below are design notes awaiting implementation and validation.
 
 Repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps).
 
@@ -13,6 +13,7 @@ Repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps).
 ## Documentation Index
 
 - [README.md](README.md): Project overview, directory structure, system architecture, and electrical planning.
+- [docs/pi-setup.md](docs/pi-setup.md): Selected fan, Pi review findings, software implementation and bench setup plan.
 - [docs/todo.md](docs/todo.md): Master planning, task tracking, measurements, and physical test records.
 - [docs/chats.md](docs/chats.md): Historical session logs (v0.1, v0.2, and v0.3) preserving earlier design rationale and prompts.
 - [src/stl/v0.3/README.md](src/stl/v0.3/README.md): Current V3.1 print sequence, hardware, assembly and OpenSCAD export instructions.
@@ -84,7 +85,7 @@ flowchart TD
 ```
 
 ### Tracking Workflow:
-1. **Telemetry & GPS Capture:** The in-cab Raspberry Pi reads real-time GPS coordinates.
+1. **Telemetry & GPS Capture (planned):** Select a supported GNSS input. A live position interface from the OTR620 has not been verified; an external receiver may be needed.
 2. **Tailscale Private Network:** Both the truck Raspberry Pi and the home Raspberry Pi are enrolled in a private **Tailscale** network. This eliminates public IP exposure and port-forwarding issues.
 3. **Home Display:** A Raspberry Pi connected to a TV/monitor at home loads a local webpage hosted by the truck Raspberry Pi via its Tailscale IP address.
 4. **Real-time Map:** The page displays a high-resolution map of Canada and the United States with a custom truck icon representing your live location.
@@ -103,7 +104,7 @@ The front of the mounting bracket will feature physical toggle switches/buttons 
 
 We have evaluated two power routing topologies for the back of the bracket:
 
-### Option A: Single USB-C Cable (Recommended)
+### Option A: Single USB-C Cable (Future candidate)
 * **Description:** A single USB-C PD (Power Delivery) source powers the entire bracket. An internal buck converter regulates the input down to stable 5V lines.
 * **Pros:**
   * Clean single-cable aesthetic behind the bracket.
@@ -114,11 +115,11 @@ We have evaluated two power routing topologies for the back of the bracket:
   * High-power charging (AirPods + GPS + Fan + Pi) could introduce electrical noise or heat.
   * Single point of failure for the entire system.
 
-### Option B: Dual USB-C Cables
+### Option B: Separate GPS and auxiliary supplies (Initial bring-up)
 * **Description:** One USB-C cable runs directly to the Garmin GPS, while a second USB-C cable powers the Raspberry Pi and auxiliary components separately.
 * **Pros:**
-  * Complete isolation of the Garmin GPS from the experimental Pi/LED/Fan circuitry.
-  * No custom internal power management or high-power step-down converters needed.
+  * Separate supply paths for the Garmin and experimental accessories; a shared upstream source or ground can still couple faults.
+  * Avoids a combined converter during initial tests; each output still needs appropriate regulation, protection and cabling.
   * If the Pi hangs or crashes, the GPS remains fully powered and functional.
 * **Cons:**
   * Looks cluttered with two separate cables exiting the back of the bracket.
@@ -126,24 +127,15 @@ We have evaluated two power routing topologies for the back of the bracket:
 
 ---
 
-## Controller Comparison: Pi Pico 2W vs. Pi Zero 2W
+## Selected controller: Raspberry Pi Zero 2 W
 
-To achieve telemetry and automation, we compare the ideal candidate boards:
+Use **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite** as the host. The user selected a full Linux OS for SSH, Tailscale, telemetry and the home-map service while retaining low-level accessory control. A Pico is no longer the primary-controller plan.
 
-| Feature | Raspberry Pi Pico 2W (RP2350) | Raspberry Pi Zero 2W (BCM2710A1) |
-|---|---|---|
-| **Category** | Microcontroller | Single Board Computer (SBC) |
-| **Operating System** | No OS (Bare-metal, RTOS, MicroPython) | Linux (Ubuntu Server, Raspberry Pi OS) |
-| **Tailscale Support** | No native client (Very difficult/non-standard) | Fully supported (Standard Linux Debian client) |
-| **Development** | C/C++ or MicroPython | Python, Node.js, standard web servers |
-| **Boot Time** | Instant (< 1 second) | 15-30 seconds |
-| **Power Consumption** | Extremely low (< 50mW) | Moderate (0.5W to 2.0W) |
-| **Web Hosting** | Extremely limited | Full features (Lightweight Nginx, Flask, or FastAPI) |
-| **SSH Access** | No standard SSH (Console over serial/USB) | Standard OpenSSH out of the box |
-| **Verdict** | **Ideal for low-power sensor/LED/fan control only.** | **Highly recommended for telemetry, Web Hosting, Tailscale, and SSH.** |
+I²C supports the selected OLED, 1-Wire supports the temperature sensors, and GPIO supports buttons and accessory control interfaces. Select a verified hardware PWM backend for fan speed; the old `RPi.GPIO.PWM()` example does not provide it. Keep fan control independent of network and display availability.
 
-### Architectural Recommendation
-To support **Tailscale**, **SSH access**, and a **Live Map Web Server** over Starlink, a **Raspberry Pi Zero 2W** (or standard Pi) is the superior choice for the in-cab brain. It can handle GPS telemetry parsing, interface with the Starlink Wi-Fi, run the Tailscale client, host the map page, and still control the LEDs, switches, and fans via its GPIO header.
+Allow for the board's micro-USB connectors, GPIO header, microSD access and 2.4 GHz Wi-Fi when designing the mount. [Raspberry Pi Zero 2 W specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
+
+Follow [the implementation and first-boot plan](docs/pi-setup.md). The board/OS choice is settled; the exact GPIO backend, OLED, power hardware, GNSS input and mechanical layout still require selection and bench testing.
 
 ---
 
@@ -153,7 +145,7 @@ To support **Tailscale**, **SSH access**, and a **Live Map Web Server** over Sta
 * **Nominal Size:** 152.4 × 86.4 × 18.0 mm
 * **Pocket Dimensions:** 153.8 × 87.8 × 19.0 mm
 * **Mounting Type:** Secure gasketed front faceplate with 4x M2 × 6 mm screws and standard M2 nuts.
-* **Operating Voltage:** 5V at up to 2A peak (Provisional target; to be verified on device label).
+* **Operating Voltage:** Provisional branch allowance of 5 V up to 2 A, not a confirmed peak rating; verify device/adapter requirements.
 
 ### Accessory Mounts (V3.1 Shelf)
 * **AirPods Pro 3 Mount:** Angled at 45° for visual access, designed around a Latercase cover. Can support a wired short right-angle USB-C cable or an embedded magnetic wireless charging puck.
@@ -161,268 +153,40 @@ To support **Tailscale**, **SSH access**, and a **Live Map Web Server** over Sta
 
 ---
 
-## Active Cooling & Thermal Management
+## Selected fan and thermal control
 
-To keep the Garmin OTR620 and the internal electronics cool during operation under direct sunlight, we will integrate an active cooling loop using a **Noctua NF-A4x10 5V** fan (40 × 40 × 10 mm).
+The selected fan is the **Noctua NF-A4x20 5V PWM**, four-pin. Its nominal body is 40 × 40 × 20 mm and the manufacturer lists 22 mm thickness with pads. That is a component envelope, not a finished pocket dimension. See the [verified specifications and connection table](docs/pi-setup.md#selected-fan-and-proposed-interface).
 
-```
-          [ Hot Air Exhaust Vents ] (Mirrors bottom aesthetic)
-                     ▲
-                     │
-         ┌───────────────────────┐
-         │     Garmin OTR620     │
-         └───────────────────────┘
-                     ▲
-                     │  (Air drawn over unit)
-         ┌───────────────────────┐
-         │ Noctua 40x40x20mm Fan │ <--- Thicker 20mm 4-Pin PWM Fan at back
-         └───────────────────────┘
-                     ▲
-                     │
-          [ Cool Air Intake Vents ] (Dual-purpose sound/intake vents)
-```
+For v0.4, provide a removable mount with adjustable fit tolerance, cable access and airflow clearance. Keep ventilation separate from the speaker return duct. The existing approximately 29.8 mm rear cavity and 39.4 mm sound opening do not establish that the complete fan installation fits. Check actual hardware and the truck test results before fixing the mount dimensions.
 
-### Thermal Design Principles:
-1. **Vertical Airflow Loop:** Air is pulled in through the intake vents at the bottom of the bracket, drawn upwards over the hot surfaces of the GPS housing and the controller board, and exhausted through matching air vents at the top of the bracket.
-2. **Symmetrical Aesthetic:** The top exhaust vents will be geometrically modeled to mirror the bottom sound duct vents on the face of the bracket, providing visual balance.
-3. **Internal Fan Mounting:** The fan will be mounted in a dedicated 40x40mm recess at the back of the main bracket body (within the ~29.8 mm lower cavity). 
-4. **Thickness Clearances:** The fan is **20 mm thick**, which offers significantly higher static pressure and cooling efficiency at very low noise levels compared to the 10 mm model. We allow a **22 mm deep envelope** in the bracket design to accommodate the vibration-damping silicone pads included with Noctua fans. This guarantees no direct plastic-to-fan mechanical contact, eliminating cabin buzz/rattling.
-5. **Isolating Acoustic Paths:** The cooling path will remain separate from the dedicated speaker return duct to prevent fan static pressure from interfering with GPS voice navigation audio.
+Control goals are temperature-based speed, hysteresis, a manual override and explicit fault behavior. A 25 kHz hardware PWM implementation must be selected for the actual Pi and OS. The previous `RPi.GPIO.PWM()` example was software PWM and has been removed from active setup instructions. The old ambiguous fan wiring drawing is replaced by the [connection plan](docs/pi-setup.md#selected-fan-and-proposed-interface).
 
-### Automated Fan Control & Temperature Sensing
+The 35–45°C ramp discussed earlier is only a bench starting proposal. Sensor faults must not be treated as 0°C. The proposed fallback requests full cooling and reports a fault, with the fan's boot/crash behavior verified electrically. See [the complete review findings](docs/pi-setup.md#review-findings-to-resolve-in-implementation).
 
-To prevent the fan from running constantly at full blast (minimizing dust accumulation and ensuring a near-silent cabin), the in-cab Raspberry Pi will automatically scale the speed of the **Noctua NF-A4x20 5V PWM** fan dynamically based on real-time ambient housing temperature.
+## Pi controller and status display
 
-#### 1. Sensor Selection: DS18B20 (Digital 1-Wire)
-* **Why DS18B20?** It is an extremely common, cheap, and robust digital sensor. It communicates over a single data line (Dallas 1-Wire protocol), requiring only **one GPIO pin** on the Raspberry Pi. Unlike analog sensors (which require an ADC chip because the Pi lacks analog input pins), the DS18B20 outputs high-precision digital readings directly.
-* **Alternative (DHT22):** Measures both temperature and humidity, but is physically much larger and more difficult to position discreetly behind the GPS compartment.
+The selected host is a Pi Zero 2 W with Raspberry Pi OS Lite. Implement sensor reading, fan/LED/button control, display updates and service management as separate components. Start with simulation and bench tests before the mount installation. The Pi controls accessories; the power-distribution hardware supplies them. Define a Linux shutdown and power-hold strategy before adding ignition or master-cutoff control.
 
-#### 2. Electrical Wiring Schematics (Ultra-Simplified)
+An SSD1306 or SH1106 OLED remains planned. Select the exact module and verify its dimensions, driver, I²C address, supply/pull-ups, viewing angle and day/night readability. Its screen should show:
 
-By choosing a **4-pin PWM fan (NF-A4x20 5V PWM)**, we **completely eliminate** the need for external MOSFET low-side switches, flyback diodes, or gate resistors. Standard 4-pin fans feature an integrated speed controller on the fan's motor circuit board. The PWM control line (blue wire) can be driven **directly** by a 3.3V GPIO pin from the Raspberry Pi.
+- Wi-Fi and Tailscale connection state with timeouts and an offline indication.
+- GPS-compartment temperature, explicitly separate from Pi CPU temperature.
+- Requested fan duty and measured RPM if tach feedback is installed.
+- Actual controller/switch state, with unavailable power feedback labeled as unknown.
 
-```
-                      [ Pi 5V Rail (Pin 2/4) ]
-                                │
-                                ├─── [ Fan Pin 2: VCC (Red) ]
-                                │
-                  [ Pi 3.3V ]   │
-                       │        │
-                 [4.7kΩ PullUp] │
-                       │        │
-      [GPIO 4] ────────┼─ (DQ)  │
-                    DS18B20     │
-      [GND]    ───────── (GND)  │
-                                │
-                      [ Pi GND (Pin 6/9) ]
-                                │
-                                ├─── [ Fan Pin 1: GND (Black) ]
-                                │
-      [GPIO 18] ────────────────┴─── [ Fan Pin 4: PWM (Blue) ]
+The former OLED snippet used fixed fan and switch values and CPU temperature, so it has been replaced by [implementation requirements](docs/pi-setup.md#proposed-files-to-implement-under-srcpi). OLED or network failure must not block local cooling. Install Python dependencies in the application's virtual environment once the exact board/module stack is selected.
 
-      *(Optional - Fan Pin 3: Tachometer (Green) can be left disconnected)
-```
+## v0.4 inputs
 
-* **DS18B20 Hookup:**
-  * **VDD** connects to **3.3V** (Pin 1 or 17).
-  * **GND** connects to **Ground** (Pin 6, 9, etc.).
-  * **DQ (Data)** connects to **GPIO 4** (Pin 7).
-  * **Pull-up Resistor:** A **4.7kΩ resistor** must be placed between the **3.3V (VDD)** and **GPIO 4 (DQ)** lines.
-* **PWM 4-Pin Fan Hookup:**
-  * **Pin 1 (Black):** Connects to **Pi Ground (GND)**.
-  * **Pin 2 (Red):** Connects to **Pi 5V Power**.
-  * **Pin 3 (Green - Tachometer / Speed feedback):** Optional. Can be left floating or wired to a GPIO with a pull-up if RPM monitoring is desired.
-  * **Pin 4 (Blue - PWM Speed Control):** Connects **directly to GPIO 18** (Pin 12 - Pi Hardware PWM pin). No external components needed.
-
-#### 3. Software Control Logic (Dynamic PWM Speed Ramping)
-
-Rather than turning simple ON/OFF, the Python controller script adjusts the speed of the fan dynamically. It runs quiet at low temperatures, ramps up as the truck dash gets warmer under direct sunlight, and only goes to full speed if temperatures spike:
-
-* **Under 35°C (95°F):** Fan is OFF (0% Duty Cycle).
-* **35°C to 45°C (95°F to 113°F):** Fan speed scales linearly from a quiet **30% speed up to 100% speed**.
-* **Over 45°C (113°F):** Fan runs at full throttle (**100% speed**).
-
-```python
-import os
-import time
-import RPi.GPIO as GPIO
-
-# Configuration
-PWM_PIN = 18          # Hardware PWM pin on Pi (GPIO 18 / Pin 12)
-PWM_FREQ = 25000      # 25kHz is the target PWM frequency for Noctua fans
-TEMP_MIN = 35.0       # Temp at which the fan starts turning (30% duty cycle)
-TEMP_MAX = 45.0       # Temp at which the fan hits full speed (100% duty cycle)
-CHECK_INTERVAL = 5    # Check temperature every 5 seconds
-
-# Setup GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(PWM_PIN, GPIO.OUT)
-
-# Initialize PWM on Pin 18
-fan_pwm = GPIO.PWM(PWM_PIN, PWM_FREQ)
-fan_pwm.start(0)  # Start at 0% duty cycle
-
-# Locating the DS18B20 1-wire directory
-W1_DIR = "/sys/bus/w1/devices/"
-try:
-    sensor_folder = [f for f in os.listdir(W1_DIR) if f.startswith("28-")][0]
-    sensor_file = os.path.join(W1_DIR, sensor_folder, "w1_slave")
-except IndexError:
-    print("Error: No DS18B20 sensor found!")
-    sensor_file = None
-
-def read_temp_raw():
-    if not sensor_file: return ""
-    with open(sensor_file, "r") as f:
-        return f.readlines()
-
-def read_temp():
-    lines = read_temp_raw()
-    while lines[0].strip()[-3:] != "YES":
-        time.sleep(0.2)
-        lines = read_temp_raw()
-    equals_pos = lines[1].find("t=")
-    if equals_pos != -1:
-        temp_string = lines[1][equals_pos+2:]
-        return float(temp_string) / 1000.0
-    return 0.0
-
-try:
-    print("Automatic Dynamic Thermal PWM System Active...")
-    
-    while True:
-        current_temp = read_temp()
-        print(f"Current GPS Compartment Temp: {current_temp:.2f}°C")
-        
-        # Calculate speed based on temperature
-        if current_temp < TEMP_MIN:
-            duty_cycle = 0
-        elif current_temp >= TEMP_MAX:
-            duty_cycle = 100
-        else:
-            # Linear scaling between 30% and 100% duty cycle
-            temp_fraction = (current_temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)
-            duty_cycle = 30 + int(temp_fraction * 70)
-            
-        print(f"Setting Fan PWM Speed: {duty_cycle}%")
-        fan_pwm.ChangeDutyCycle(duty_cycle)
-        time.sleep(CHECK_INTERVAL)
-
-except KeyboardInterrupt:
-    print("Shutting down thermal service...")
-finally:
-    fan_pwm.stop()
-    GPIO.cleanup()
-```
-
-### In-Cab Status Display & Dashboard HUD (I2C OLED)
-
-To provide the driver with real-time feedback on the bracket's operating state, we will mount a small, high-contrast **SSD1306 I2C OLED display** (0.96" or 1.3" with 128x64 pixels) on the front of the bracket faceplate. OLEDs are highly readable at night and in direct sunlight due to self-emitting pixels.
-
-#### 1. Real-Time Telemetry Screen Layout
-The 128x64 pixel canvas will be split into 4 clear rows:
-* **Row 1 (System Connectivity):** `Wi-Fi: Starlink_Truck (Good)`
-* **Row 2 (VPN & Remote Access):** `IP: 100.112.44.82 (Tailscale)`
-* **Row 3 (Thermal State):** `Temp: 38.4°C  | Fan: 62%`
-* **Row 4 (Power Switch State):** `GPS: ON | LED: OFF`
-
-#### 2. Electrical Wiring Schematic (I2C Bus)
-The SSD1306 uses the I2C serial protocol. The Pi has built-in hardware I2C lines on Pins 3 and 5. The display runs on **3.3V logic**, meaning it matches the Pi's internal GPIO voltage perfectly (avoid running the screen on 5V, as it can damage the Pi's I2C lines if pull-up resistors are on the display board).
-
-```
-     Raspberry Pi GPIO Header                 SSD1306 OLED Display (4-Pin)
-    ┌────────────────────────┐               ┌──────────────────────────┐
-    │  [Pin 1]  3.3V Power   ├───────────────┤   VCC                    │
-    │  [Pin 3]  SDA (I2C)    ├───────────────┤   SDA                    │
-    │  [Pin 5]  SCL (I2C)    ├───────────────┤   SCL                    │
-    │  [Pin 9]  Ground (GND) ├───────────────┤   GND                    │
-    └────────────────────────┘               └──────────────────────────┘
-```
-
-#### 3. Python OLED Display Driver Script
-
-The Python script leverages the **`luma.oled`** library (which handles screen drawing, font rendering, and hardware buffering) and the **`Pillow (PIL)`** library to draw text and custom symbols:
-
-```python
-import os
-import subprocess
-import time
-from PIL import Image, ImageDraw, ImageFont
-from luma.core.interface.serial import i2c
-from luma.core.render import canvas
-from luma.oled.device import ssd1306
-
-# Initialize I2C interface and SSD1306 screen
-serial = i2c(port=1, address=0x3C)
-device = ssd1306(serial)
-
-# Load a default clean pixel font (or path to a TrueType font)
-font = ImageFont.load_default()
-
-def get_wifi_info():
-    """Gets the active Wi-Fi SSID and signal status."""
-    try:
-        ssid = subprocess.check_output("iwgetid -r", shell=True).decode("utf-8").strip()
-        if not ssid:
-            return "Disconnected", "No Link"
-        return ssid, "Starlink"
-    except Exception:
-        return "Offline", "No Wi-Fi"
-
-def get_tailscale_ip():
-    """Gets the private Tailscale VPN IP of the truck."""
-    try:
-        output = subprocess.check_output("tailscale ip -4", shell=True).decode("utf-8").strip()
-        return output if output else "No IP"
-    except Exception:
-        return "No VPN"
-
-def get_pi_temp():
-    """Reads the core temperature of the Pi (as fallback for DS18B20)."""
-    try:
-        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
-            temp = float(f.read()) / 1000.0
-            return f"{temp:.1f}C"
-    except Exception:
-        return "N/A"
-
-try:
-    print("In-Cab OLED Monitor Daemon Active...")
-    while True:
-        ssid, net_type = get_wifi_info()
-        ip_addr = get_tailscale_ip()
-        temp_str = get_pi_temp()
-        
-        # Hypothetical fan speed & switch variables from the control thread
-        fan_speed = "45%"  
-        gps_status = "ON"
-        led_status = "OFF"
-        
-        with canvas(device) as draw:
-            # Draw Row 1: Wi-Fi SSID
-            draw.text((0, 0), f"Wi-Fi: {ssid[:14]}", font=font, fill=255)
-            
-            # Draw Row 2: Tailscale IP
-            draw.text((0, 16), f"VPN: {ip_addr}", font=font, fill=255)
-            
-            # Draw Row 3: Temperature & Fan Speed
-            draw.text((0, 32), f"Temp: {temp_str} | Fan: {fan_speed}", font=font, fill=255)
-            
-            # Draw Row 4: Power Switch States
-            draw.text((0, 48), f"GPS: {gps_status} | LED: {led_status}", font=font, fill=255)
-            
-        time.sleep(2)
-
-except KeyboardInterrupt:
-    print("OLED service stopped.")
-```
+Finish and record the v0.2 fit tests, then check the v0.3 mounting tabs and M2 hardware separately. The v0.2 round PopGrip pocket does not validate the oval PopSocket. Freeze the Pi, fan, OLED, switches and cable envelopes before designing permanent openings. The next mechanical revision is planned under `src/stl/v0.4/`; no v0.4 files have been generated yet. [Detailed checklist](docs/pi-setup.md#v04-preparation-after-fit-tests)
 
 ---
 
 ## Next Planning Phases
 1. **Mechanical Prototyping:** 3D print the V3.1 coupon tests and verify Volvo VNL cubby fit, M2 nut recesses, and Garmin housing dimensions.
-2. **Power Hardware Selection:** Choose between a Single USB-C 12V PD buck board or separate dual cords.
+2. **Bench Bring-up:** Follow [the Pi setup plan](docs/pi-setup.md); initially power the GPS and accessory electronics separately. Recalculate the future combined supply budget using the selected Pi and peripherals.
 3. **Telemetry & Software PoC:**
    * Configure a Raspberry Pi Zero 2W with Tailscale and connect it to truck Starlink Wi-Fi.
    * Write a lightweight service in Python to process GPS NMEA data sentences.
    * Design a simple dashboard map using TomTom Orbis Web SDK / API.
+
