@@ -133,9 +133,9 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 ## 8. Optional cooling and fan control
 
 - [ ] Decide from measurements whether active cooling adds value.
-- [ ] Model the **Noctua NF-A4x10 5V fan** mounting spot:
-  - Create a 40 × 40 × 12 mm pocket envelope in the back of the bracket body (inside the ~29.8 mm deep lower cavity).
-  - Verify that the 12 mm allowance is used to clear the vibration-damping silicone pads.
+- [ ] Model the **Noctua NF-A4x20 5V PWM fan** (40 × 40 × 20 mm) mounting spot:
+  - Create a **40 × 40 × 22 mm pocket envelope** in the back of the bracket body (inside the ~29.8 mm deep lower cavity).
+  - Verify that the 22 mm allowance is used to clear the fan body plus the vibration-damping silicone corner pads.
   - Position mounting bosses/screw points for small M3 fan-mounting screws or pins in the rear wall of the bracket.
 - [ ] Design the symmetrical airflow ventilation loop:
   - Add **hot air exhaust vents** along the top of the bracket faceplate/bezel.
@@ -143,7 +143,22 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
   - Keep the rising exhaust airflow path completely isolated from the separate sound return duct.
 - [ ] Establish bottom-to-top airflow: ensure the fan orientation draws fresh air from the bottom intake, channels it up behind the GPS, and expels it out through the top vents.
 - [ ] Check fan physical clearance around the GPS housing, the right-angle USB elbow, internal wires, and any auxiliary switches/buttons.
-- [ ] Implement temperature monitoring, fan hysteresis and charger overtemperature shutdown.
+- [ ] Source and wire the **DS18B20 digital 1-Wire temperature sensor**:
+  - Secure a waterproof or TO-92 package DS18B20 sensor.
+  - Solder a **4.7kΩ pull-up resistor** between VDD (3.3V) and DQ (Data - GPIO 4) lines.
+  - Route wires cleanly through the bracket, isolating them from high-vibration spots.
+  - Position the sensor tip close to the GPS's upper rear exhaust zone inside the bracket pocket.
+- [ ] Connect the **Noctua 4-Pin PWM Fan** directly to the Raspberry Pi:
+  - Connect **Pin 1 (Black/GND)** directly to Pi Ground (GND).
+  - Connect **Pin 2 (Red/5V)** directly to Pi 5V power (Pin 2 or 4).
+  - Connect **Pin 4 (Blue/PWM)** directly to **GPIO 18** (Pin 12) for hardware speed control (no external MOSFET or components needed).
+  - *Optional:* Route Pin 3 (Green/Tachometer) to a GPIO pin with a pull-up if software speed reading is required.
+- [ ] Implement and test the Software Control System under `src/pi/`:
+  - Enable the 1-Wire kernel modules on the Pi (`w1-gpio` and `w1-therm` via `/boot/firmware/config.txt`).
+  - Deploy the automatic temperature daemon script to monitor readings via `/sys/bus/w1/devices/`.
+  - Configure dynamic PWM boundaries: Quiet start at **35.0°C (30% speed)** ramping up linearly to **100% full throttle at 45.0°C**.
+  - Test PWM frequency generation (25kHz) and verify smooth speed ramping under load.
+  - Enable the python script as a background system service (`systemd` daemon) that boots automatically with the Pi.
 
 ---
 

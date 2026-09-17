@@ -1,3 +1,5 @@
+# This is for raw notes, ideas to be transferred over to the repos docs
+
 need to research how i can use a raspberry pi pico 2W to add to the project to control the blue leds, fan (if needed), power management so i can use a single usb c into the pi, the pi can power the gps, lights, charge the airpods with a usb c connector or wireless charging built into the airpods mount.
 the front of the bracket we can add buttons to control the pi for main power, power for the gps, power for the lights, and power for the fan etc. 
 I do have wifi in the truck with starlink so the pi can connect to the wifi for playing with it once its installed to add more features, might look into

@@ -155,7 +155,7 @@ To keep the Garmin OTR620 and the internal electronics cool during operation und
                      ▲
                      │  (Air drawn over unit)
          ┌───────────────────────┐
-         │ Noctua 40x40x10mm Fan │ <--- Mounted at back of bracket
+         │ Noctua 40x40x20mm Fan │ <--- Thicker 20mm 4-Pin PWM Fan at back
          └───────────────────────┘
                      ▲
                      │
@@ -166,8 +166,134 @@ To keep the Garmin OTR620 and the internal electronics cool during operation und
 1. **Vertical Airflow Loop:** Air is pulled in through the intake vents at the bottom of the bracket, drawn upwards over the hot surfaces of the GPS housing and the controller board, and exhausted through matching air vents at the top of the bracket.
 2. **Symmetrical Aesthetic:** The top exhaust vents will be geometrically modeled to mirror the bottom sound duct vents on the face of the bracket, providing visual balance.
 3. **Internal Fan Mounting:** The fan will be mounted in a dedicated 40x40mm recess at the back of the main bracket body (within the ~29.8 mm lower cavity). 
-4. **Thickness Clearances:** While the fan is 10 mm thick, we allow a **12 mm deep envelope** in the bracket design to accommodate the vibration-damping silicone pads included with Noctua fans. This guarantees no direct plastic-to-fan mechanical contact, eliminating cabin buzz/rattling.
+4. **Thickness Clearances:** The fan is **20 mm thick**, which offers significantly higher static pressure and cooling efficiency at very low noise levels compared to the 10 mm model. We allow a **22 mm deep envelope** in the bracket design to accommodate the vibration-damping silicone pads included with Noctua fans. This guarantees no direct plastic-to-fan mechanical contact, eliminating cabin buzz/rattling.
 5. **Isolating Acoustic Paths:** The cooling path will remain separate from the dedicated speaker return duct to prevent fan static pressure from interfering with GPS voice navigation audio.
+
+### Automated Fan Control & Temperature Sensing
+
+To prevent the fan from running constantly at full blast (minimizing dust accumulation and ensuring a near-silent cabin), the in-cab Raspberry Pi will automatically scale the speed of the **Noctua NF-A4x20 5V PWM** fan dynamically based on real-time ambient housing temperature.
+
+#### 1. Sensor Selection: DS18B20 (Digital 1-Wire)
+* **Why DS18B20?** It is an extremely common, cheap, and robust digital sensor. It communicates over a single data line (Dallas 1-Wire protocol), requiring only **one GPIO pin** on the Raspberry Pi. Unlike analog sensors (which require an ADC chip because the Pi lacks analog input pins), the DS18B20 outputs high-precision digital readings directly.
+* **Alternative (DHT22):** Measures both temperature and humidity, but is physically much larger and more difficult to position discreetly behind the GPS compartment.
+
+#### 2. Electrical Wiring Schematics (Ultra-Simplified)
+
+By choosing a **4-pin PWM fan (NF-A4x20 5V PWM)**, we **completely eliminate** the need for external MOSFET low-side switches, flyback diodes, or gate resistors. Standard 4-pin fans feature an integrated speed controller on the fan's motor circuit board. The PWM control line (blue wire) can be driven **directly** by a 3.3V GPIO pin from the Raspberry Pi.
+
+```
+                      [ Pi 5V Rail (Pin 2/4) ]
+                                │
+                                ├─── [ Fan Pin 2: VCC (Red) ]
+                                │
+                  [ Pi 3.3V ]   │
+                       │        │
+                 [4.7kΩ PullUp] │
+                       │        │
+      [GPIO 4] ────────┼─ (DQ)  │
+                    DS18B20     │
+      [GND]    ───────── (GND)  │
+                                │
+                      [ Pi GND (Pin 6/9) ]
+                                │
+                                ├─── [ Fan Pin 1: GND (Black) ]
+                                │
+      [GPIO 18] ────────────────┴─── [ Fan Pin 4: PWM (Blue) ]
+
+      *(Optional - Fan Pin 3: Tachometer (Green) can be left disconnected)
+```
+
+* **DS18B20 Hookup:**
+  * **VDD** connects to **3.3V** (Pin 1 or 17).
+  * **GND** connects to **Ground** (Pin 6, 9, etc.).
+  * **DQ (Data)** connects to **GPIO 4** (Pin 7).
+  * **Pull-up Resistor:** A **4.7kΩ resistor** must be placed between the **3.3V (VDD)** and **GPIO 4 (DQ)** lines.
+* **PWM 4-Pin Fan Hookup:**
+  * **Pin 1 (Black):** Connects to **Pi Ground (GND)**.
+  * **Pin 2 (Red):** Connects to **Pi 5V Power**.
+  * **Pin 3 (Green - Tachometer / Speed feedback):** Optional. Can be left floating or wired to a GPIO with a pull-up if RPM monitoring is desired.
+  * **Pin 4 (Blue - PWM Speed Control):** Connects **directly to GPIO 18** (Pin 12 - Pi Hardware PWM pin). No external components needed.
+
+#### 3. Software Control Logic (Dynamic PWM Speed Ramping)
+
+Rather than turning simple ON/OFF, the Python controller script adjusts the speed of the fan dynamically. It runs quiet at low temperatures, ramps up as the truck dash gets warmer under direct sunlight, and only goes to full speed if temperatures spike:
+
+* **Under 35°C (95°F):** Fan is OFF (0% Duty Cycle).
+* **35°C to 45°C (95°F to 113°F):** Fan speed scales linearly from a quiet **30% speed up to 100% speed**.
+* **Over 45°C (113°F):** Fan runs at full throttle (**100% speed**).
+
+```python
+import os
+import time
+import RPi.GPIO as GPIO
+
+# Configuration
+PWM_PIN = 18          # Hardware PWM pin on Pi (GPIO 18 / Pin 12)
+PWM_FREQ = 25000      # 25kHz is the target PWM frequency for Noctua fans
+TEMP_MIN = 35.0       # Temp at which the fan starts turning (30% duty cycle)
+TEMP_MAX = 45.0       # Temp at which the fan hits full speed (100% duty cycle)
+CHECK_INTERVAL = 5    # Check temperature every 5 seconds
+
+# Setup GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(PWM_PIN, GPIO.OUT)
+
+# Initialize PWM on Pin 18
+fan_pwm = GPIO.PWM(PWM_PIN, PWM_FREQ)
+fan_pwm.start(0)  # Start at 0% duty cycle
+
+# Locating the DS18B20 1-wire directory
+W1_DIR = "/sys/bus/w1/devices/"
+try:
+    sensor_folder = [f for f in os.listdir(W1_DIR) if f.startswith("28-")][0]
+    sensor_file = os.path.join(W1_DIR, sensor_folder, "w1_slave")
+except IndexError:
+    print("Error: No DS18B20 sensor found!")
+    sensor_file = None
+
+def read_temp_raw():
+    if not sensor_file: return ""
+    with open(sensor_file, "r") as f:
+        return f.readlines()
+
+def read_temp():
+    lines = read_temp_raw()
+    while lines[0].strip()[-3:] != "YES":
+        time.sleep(0.2)
+        lines = read_temp_raw()
+    equals_pos = lines[1].find("t=")
+    if equals_pos != -1:
+        temp_string = lines[1][equals_pos+2:]
+        return float(temp_string) / 1000.0
+    return 0.0
+
+try:
+    print("Automatic Dynamic Thermal PWM System Active...")
+    
+    while True:
+        current_temp = read_temp()
+        print(f"Current GPS Compartment Temp: {current_temp:.2f}°C")
+        
+        # Calculate speed based on temperature
+        if current_temp < TEMP_MIN:
+            duty_cycle = 0
+        elif current_temp >= TEMP_MAX:
+            duty_cycle = 100
+        else:
+            # Linear scaling between 30% and 100% duty cycle
+            temp_fraction = (current_temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)
+            duty_cycle = 30 + int(temp_fraction * 70)
+            
+        print(f"Setting Fan PWM Speed: {duty_cycle}%")
+        fan_pwm.ChangeDutyCycle(duty_cycle)
+        time.sleep(CHECK_INTERVAL)
+
+except KeyboardInterrupt:
+    print("Shutting down thermal service...")
+finally:
+    fan_pwm.stop()
+    GPIO.cleanup()
+```
 
 ---
 
