@@ -133,8 +133,16 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 ## 8. Optional cooling and fan control
 
 - [ ] Decide from measurements whether active cooling adds value.
-- [ ] If using the Noctua NF-A4x10 5V, allow a 40 × 40 mm footprint and verify actual thickness with pads.
-- [ ] Check fan clearance around the GPS, USB elbow, wiring and electronics; measure acoustic interference and airflow after assembly.
+- [ ] Model the **Noctua NF-A4x10 5V fan** mounting spot:
+  - Create a 40 × 40 × 12 mm pocket envelope in the back of the bracket body (inside the ~29.8 mm deep lower cavity).
+  - Verify that the 12 mm allowance is used to clear the vibration-damping silicone pads.
+  - Position mounting bosses/screw points for small M3 fan-mounting screws or pins in the rear wall of the bracket.
+- [ ] Design the symmetrical airflow ventilation loop:
+  - Add **hot air exhaust vents** along the top of the bracket faceplate/bezel.
+  - Programmatically pattern the top exhaust vents to perfectly mirror the geometry of the bottom sound return/intake ducts for balanced aesthetics.
+  - Keep the rising exhaust airflow path completely isolated from the separate sound return duct.
+- [ ] Establish bottom-to-top airflow: ensure the fan orientation draws fresh air from the bottom intake, channels it up behind the GPS, and expels it out through the top vents.
+- [ ] Check fan physical clearance around the GPS housing, the right-angle USB elbow, internal wires, and any auxiliary switches/buttons.
 - [ ] Implement temperature monitoring, fan hysteresis and charger overtemperature shutdown.
 
 ---

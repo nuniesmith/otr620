@@ -141,6 +141,36 @@ To support **Tailscale**, **SSH access**, and a **Live Map Web Server** over Sta
 
 ---
 
+## Active Cooling & Thermal Management
+
+To keep the Garmin OTR620 and the internal electronics cool during operation under direct sunlight, we will integrate an active cooling loop using a **Noctua NF-A4x10 5V** fan (40 × 40 × 10 mm).
+
+```
+          [ Hot Air Exhaust Vents ] (Mirrors bottom aesthetic)
+                     ▲
+                     │
+         ┌───────────────────────┐
+         │     Garmin OTR620     │
+         └───────────────────────┘
+                     ▲
+                     │  (Air drawn over unit)
+         ┌───────────────────────┐
+         │ Noctua 40x40x10mm Fan │ <--- Mounted at back of bracket
+         └───────────────────────┘
+                     ▲
+                     │
+          [ Cool Air Intake Vents ] (Dual-purpose sound/intake vents)
+```
+
+### Thermal Design Principles:
+1. **Vertical Airflow Loop:** Air is pulled in through the intake vents at the bottom of the bracket, drawn upwards over the hot surfaces of the GPS housing and the controller board, and exhausted through matching air vents at the top of the bracket.
+2. **Symmetrical Aesthetic:** The top exhaust vents will be geometrically modeled to mirror the bottom sound duct vents on the face of the bracket, providing visual balance.
+3. **Internal Fan Mounting:** The fan will be mounted in a dedicated 40x40mm recess at the back of the main bracket body (within the ~29.8 mm lower cavity). 
+4. **Thickness Clearances:** While the fan is 10 mm thick, we allow a **12 mm deep envelope** in the bracket design to accommodate the vibration-damping silicone pads included with Noctua fans. This guarantees no direct plastic-to-fan mechanical contact, eliminating cabin buzz/rattling.
+5. **Isolating Acoustic Paths:** The cooling path will remain separate from the dedicated speaker return duct to prevent fan static pressure from interfering with GPS voice navigation audio.
+
+---
+
 ## Next Planning Phases
 1. **Mechanical Prototyping:** 3D print the V3.1 coupon tests and verify Volvo VNL cubby fit, M2 nut recesses, and Garmin housing dimensions.
 2. **Power Hardware Selection:** Choose between a Single USB-C 12V PD buck board or separate dual cords.
