@@ -24,6 +24,7 @@ Goal: verify the truck and accessories before committing to the full print; the 
 - [ ] Confirm filament, nozzle diameter and slicer profile for the Ender 3 Neo.
 - [ ] Select the final dashboard material based on printer capability and heat performance; keep mockup and final-material results distinct.
 - [ ] Inspect each test in the slicer at 100% scale; check clips, exclusion zones, purge lines, support footprint and brim clearance.
+- [ ] Remeasure opening height from the cubby floor/top of the black front lip to the opening top; record lip height separately from gray trim. The earlier approximately 8 mm discrepancy was a photo estimate.
 - [ ] Print `truck_fit_frame.stl`; check opening, corner radii, floor ridges and trim behind the wider mounting tabs.
 - [ ] Print `fit_gauge.stl`; check depth, taper and the top-bar step against the stated 25.4/50.8 mm depths.
 - [ ] Determine whether to remove the existing ball mount or revise geometry to clear it.
@@ -40,12 +41,14 @@ Completion criterion: measured truck, hardware, pad and accessory results are re
 
 ## 2. GPS verification — when the unit arrives
 
-- [ ] Measure the OTR620 housing and compare it with the 152.4 × 86.4 × 18 mm stand-in.
+- [ ] Measure the OTR620 housing and compare it with the 152.4 × 86.4 × 18 mm stand-in; verify the older approximately 2.3 mm device-radius and 2.0 mm pocket-radius assumptions.
+- [ ] Verify that the complete GPS/padding arrangement remains ahead of the top bar, including rear features and cable clearance.
 - [ ] Photograph the rear square-on with a ruler; locate USB-C, speaker, microphone, power button and microSD access.
 - [ ] Measure the plastic bezel and verify the 1.2 mm faceplate overlap stays clear of display glass.
 - [ ] Confirm the required rubber compression and closure stops; avoid clamping the glass or distorting the housing.
 - [ ] Choose a replaceable silicone gasket or compatible gasket-maker process; test the 1.2 × 0.6 mm groove. Fully cure formed gasket material away from the GPS.
 - [ ] Measure the right-angle cable while plugged in: rear projection, sideways reach, strain-relief envelope and exit direction.
+- [ ] Resolve the older 20 mm versus 3/4-inch cable-hole wording: 3/4 inch equals 19.05 mm. Size the opening for the actual connector and any selected protection.
 - [ ] Confirm the cable route through or behind the cubby; the current insert uses the nominal full 50.8 mm depth.
 - [ ] Revise the USB clearance pocket and add a removable cable-jacket clamp if needed, keeping slack at the connector.
 - [ ] Read GPS/adapter labels and verify operating voltage and charging demand with navigation running and a partly discharged battery. Do not adopt 5 V/1 A as a confirmed rating.
@@ -70,6 +73,8 @@ Completion criterion: GPS housing, bezel, ports, cable envelope and electrical r
 ## 4. Initial operation — direct GPS power
 
 - [ ] Install the GPS using its supplied power arrangement and secured cable route.
+- [ ] Bench-check startup and behavior when external power is removed/restored; decide whether ignition-switched power is appropriate.
+- [ ] Confirm access to the rear power key/reset procedure and microSD card with the chosen faceplate and removal method.
 - [ ] Record GPS compartment, cabin and shelf temperatures under representative use, including sunlight exposure.
 - [ ] Check sustained navigation and charging for resets, intermittent power or cable strain.
 - [ ] Use the measurements to decide whether ventilation or a fan is needed before adding heat-producing accessories.
@@ -121,10 +126,17 @@ Dependency: verified device requirements and real component dimensions. The sess
 
 ## 9. Repository and archive maintenance
 
-- [ ] Add these three Markdown files to the intended `otr620` repository. No repository URL or remote has been supplied in this documentation task.
-- [ ] Add or organize the current V3.1 source, 12 STLs, hardware image and CAD check report; preserve older revisions as historical.
+- [x] Record the user-confirmed directory mapping: `src/v0.1` and `src/v0.2` are Claude sessions; `src/v0.3` is this ChatGPT session.
+- [x] Receive the repository URL: [nuniesmith/otr620repo](https://github.com/nuniesmith/otr620repo).
+- [ ] Resolve repository access or confirm the URL; the GitHub plugin returned `Not Found`, so no repository files have been inspected.
+- [ ] Inspect existing repository files before choosing documentation placement or changing links.
+- [ ] Add the updated three Markdown files to `nuniesmith/otr620repo` after repository access and target paths are established.
+- [ ] Check that the current V3.1 source, 12 STLs, hardware image and CAD check report are organized under `src/v0.3`; preserve the Claude session files under `src/v0.1` and `src/v0.2`.
 - [ ] Preserve the original prototype package's printing and assembly notes when integrating this top-level README.
-- [ ] Obtain the full Claude export or pasted conversation and append it to `chats.md` under a clearly identified Claude section. The existing file contains only the supplied Claude prompts and available ChatGPT discussion.
+- [x] Preserve all supplied first Claude response text under the `src/v0.1` session section in `chats.md`.
+- [x] Preserve all supplied second Claude response text under the `src/v0.2` session section in `chats.md`.
+- [ ] If any original Claude prompts, code blocks or turns remain outside the supplied text, append them with session labels; do not infer missing turn boundaries.
+- [ ] Confirm which Claude session corresponds to the supplied share URL and previously pasted prompts. The public share still could not be retrieved by the web reader.
 - [ ] Add measured dimensions, print settings, fit photos and hardware details as results become available.
 - [ ] Track implementation separately from proposed features; update README and tasks after each accepted revision.
 

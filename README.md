@@ -7,12 +7,26 @@ Parametric Garmin OTR620 mount for the upper dash cubby in a **2022 Volvo VNL 86
 ## Documentation
 
 - [README.md](README.md): current design, dimensions, printing sequence and upgrade concepts.
-- [chats.md](chats.md): available ChatGPT discussion and user-pasted Claude prompts, including superseded proposals.
+- [chats.md](chats.md): supplied Claude v0.1/v0.2 responses, earlier user-pasted prompts and available ChatGPT discussion, including superseded proposals.
 - [todo.md](todo.md): completed work, ordered tasks, measurements and release criteria.
 
-This documentation was split from `Garmin_OTR620_Project_Record.docx` on September 17, 2026. The original Claude share was inaccessible; its complete responses are not present. These three files document the existing design package; they do not include the CAD, STL or image assets themselves.
+This documentation was split from `Garmin_OTR620_Project_Record.docx` on September 17, 2026. The original Claude share could not be retrieved directly. The Claude response text subsequently pasted by the user for v0.1 and v0.2 is now preserved in `chats.md`, along with the previously supplied prompts and available ChatGPT discussion. These three files document the existing design package; they do not include the CAD, STL or image assets themselves.
 
 ## Start here
+
+### Repository sessions
+
+The repository uses the following session directories, as confirmed by the project owner:
+
+| Repository directory | Session |
+|---|---|
+| `src/v0.1` | First Claude session |
+| `src/v0.2` | Second Claude session |
+| `src/v0.3` | This ChatGPT session |
+
+These directory versions identify sessions. The historical CAD labels `v2`, `V3` and `V3.1` are retained in filenames and the conversation archive; `V3.1` is the latest prototype from the `src/v0.3` session, not a separate repository session. The repository is [nuniesmith/otr620repo](https://github.com/nuniesmith/otr620repo). The GitHub plugin returned `Not Found` when attempting to read it, so the directory mapping remains user supplied and repository contents have not been inspected. The shared Claude URL has not yet been assigned to either `v0.1` or `v0.2`.
+
+### First fit tests
 
 1. Use the V3.1 package: `OTR620_VNL_V3_Prototype.zip` (the archive name still says V3).
 2. Confirm filament and nozzle, then slice the small truck, hardware and accessory tests at 100% scale for the Ender 3 Neo's stated 220 × 220 mm bed.
@@ -21,7 +35,7 @@ This documentation was split from `Garmin_OTR620_Project_Record.docx` on Septemb
 
 ## Project scope and supplied material
 
-The user supplied a ZIP containing the original v2 OpenSCAD source, two main STL parts, four fit-test STL files and an illustrated preview. Seven images showed the cubby, handwritten measurements, rubber grip tape, the oval PopSocket, a right-angle USB-C cable and an earlier project illustration. The shared Claude URL could not be retrieved. The Claude prompts later pasted by the user are included in the conversation record; the underlying Claude conversation is not represented as reviewed.
+The user supplied a ZIP containing the original v2 OpenSCAD source, two main STL parts, four fit-test STL files and an illustrated preview. Seven images showed the cubby, handwritten measurements, rubber grip tape, the oval PopSocket, a right-angle USB-C cable and an earlier project illustration. The shared Claude URL could not be retrieved. The Claude prompts and v0.1/v0.2 response text later pasted by the user are included in the conversation record. These supplied passages have been reviewed as historical discussion; a complete raw Claude export has not been independently obtained.
 
 The original intent was a flush-looking insert secured to the truck by four bolts, a padded GPS pocket, a return duct that brings sound from the rear speaker out through the front, and a shelf below the cubby. Discussion expanded to removable GPS retention, cable strain relief, low-brightness blue lighting, AirPods charging, temperature sensing and optional active ventilation.
 
@@ -70,6 +84,24 @@ V3 replaced the accessory shelf layout, introduced an upward-facing AirPods tray
 V3.1 supersedes that fastener design. The user requested metric bolts and nuts for repeatable removal. Because the old side rails were too narrow for robust nut pockets, four tabs were added in front of the dash opening. Four nominal M2 × 6 mm screws enter through the faceplate and engage plain M2 nuts in slots in the fixed insert. The faceplate is now 6.6 mm proud. The shelf geometry is retained from V3.
 
 The nut pockets assume approximately 4 mm across-flats nuts, 1.6 mm thick. The model uses a 4.3 mm pocket and 1.8 mm slot thickness. Coupons provide 4.1, 4.3 and 4.5 mm allowances. Nuts load through an open entry; a removable tape cover was proposed to keep them from sliding out when screws are absent. The slots prevent rotation and axial escape. Thick locking nuts are not a drop-in replacement.
+
+
+### Details recovered from the supplied Claude responses
+
+The following are historical assumptions and checks to carry forward; they do not establish physical fit:
+
+| Topic | Earlier Claude design | Current implication |
+|---|---|---|
+| Cubby height reference | v0.2 warned that 3 7/8 inches must be measured from the cubby floor/top of the black front lip, not the gray trim. Its estimate of an approximately 8 mm error came from a photo. | Confirm the actual reference surfaces and lip height before trusting the 98 mm insert height. |
+| GPS clearance at top bar | v0.1 placed the GPS entirely in the front inch, ahead of the bar, despite the GPS being taller than the opening beneath the bar. | Verify GPS thickness, padding, pocket depth and rear-feature clearance together. |
+| Corners and taper | v0.1 assumed a roughly 2.3 mm device radius, 2.0 mm pocket radius and 4 mm taper per side from a photo estimate. | Measure actual corners and side-wall taper with the fit pieces. |
+| GPS retention | v0.1 used sparse VHB pads; v0.2 used compressed rubber and described suction-cup removal. | V3.1 uses a removable faceplate with M2 hardware; the old friction-only installation instructions are historical. |
+| Shelf | v0.2 used a deep AirPods slot, round PopGrip seat and a smaller shelf reach. | V3.1 uses an upward-facing shallow AirPods tray, oval PopSocket pocket and roughly 80.1 mm forward / 73.9 mm downward reach. |
+| Dash hardware | v0.1 proposed 3/8-inch or 10 mm head pockets and 1 1/4-inch or M6 × 30 bolts, assuming a roughly 3 mm dash wall. | Measure bolt head, shank, grip length and rear access. These are separate from the M2 faceplate screws. |
+| Cable hole | Earlier text called the rear hole both 20 mm and 3/4 inch. | 3/4 inch is 19.05 mm; select the actual opening from connector clearance rather than treating these sizes as identical. |
+| Power and servicing | v0.1 proposed ignition-switched power and warned about the covered rear power button and microSD slot. | Verify power-on/power-loss behavior and service access with the actual GPS. |
+
+Earlier claims of collision-free geometry and minimal support needs refer to the Claude revisions. They do not replace checking the current V3.1 parts in the slicer and truck. Claims that the device "fits" remain subject to the still-pending physical tests.
 
 ## Mechanical details to retain
 
