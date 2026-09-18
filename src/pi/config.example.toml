@@ -1,0 +1,16 @@
+# Bench/simulation values, not validated device protection limits.
+[fan]
+start_c = 35.0
+stop_c = 32.0
+full_c = 45.0
+min_duty_pct = 30.0
+
+[sensor]
+id = "gps-compartment"
+stale_after_s = 15.0
+min_valid_c = -40.0
+max_valid_c = 100.0
+
+[led]
+enabled = false
+brightness_pct = 5.0

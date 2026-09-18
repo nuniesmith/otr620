@@ -4,7 +4,7 @@ A modular, parametric mount for the upper dash cubby in a **2022 Volvo VNL 860**
 
 This repository, formerly specific to the OTR620, has been restructured into a generic **`truck-gps`** project to host both mechanical (STL/CAD) files and software (Raspberry Pi/telemetry) code.
 
-**Current status:** the repository contains the V3.1 mechanical fit prototype and earlier CAD sessions. The four v0.2 test pieces are currently being printed; physical fit results remain pending. Telemetry, controller software, the OLED display and revised cooling/power hardware are plans; `src/pi/` has not been created yet. The code snippets and wiring proposals below are design notes awaiting implementation and validation.
+**Current status:** the repository contains the V3.1 mechanical fit prototype and earlier CAD sessions. The four v0.2 test pieces are currently being printed; physical fit results remain pending. A runnable simulation-first controller now lives in `src/pi/`: fan hysteresis, full-speed override, LED commands, sensor-fault handling and text/JSON status. Physical GPIO/PWM, live sensors, OLED, telemetry and revised cooling/power hardware remain unimplemented and untested.
 
 Repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps).
 
@@ -13,6 +13,7 @@ Repository: [nuniesmith/truck-gps](https://github.com/nuniesmith/truck-gps).
 ## Documentation Index
 
 - [README.md](README.md): Project overview, directory structure, system architecture, and electrical planning.
+- [src/pi/README.md](src/pi/README.md): Run the controller simulation, tests, configuration and example service.
 - [docs/pi-setup.md](docs/pi-setup.md): Selected fan, Pi review findings, software implementation and bench setup plan.
 - [docs/todo.md](docs/todo.md): Master planning, task tracking, measurements, and physical test records.
 - [docs/chats.md](docs/chats.md): Historical session logs (v0.1, v0.2, and v0.3) preserving earlier design rationale and prompts.
@@ -34,7 +35,7 @@ truck-gps/
 │   ├── tomtom-api.md       # TomTom Orbis & legacy Maps pricing/specs
 │   └── google-maps-api.md  # Google Maps pricing and capability reference
 └── src/                    # Source code and physical designs
-    ├── pi/                 # Planned; no controller or telemetry source files yet
+    ├── pi/                 # Runnable controller simulation; hardware and telemetry pending
     └── stl/                # 3D printer files (OpenSCAD & STLs grouped by design versions)
         ├── v0.1/           # First-generation design files
         ├── v0.2/           # Second-generation design files
@@ -135,7 +136,7 @@ I²C supports the selected OLED, 1-Wire supports the temperature sensors, and GP
 
 Allow for the board's micro-USB connectors, GPIO header, microSD access and 2.4 GHz Wi-Fi when designing the mount. [Raspberry Pi Zero 2 W specifications](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
 
-Follow [the implementation and first-boot plan](docs/pi-setup.md). The board/OS choice is settled; the exact GPIO backend, OLED, power hardware, GNSS input and mechanical layout still require selection and bench testing.
+Run [the controller simulation](src/pi/README.md) now, then follow [the implementation and first-boot plan](docs/pi-setup.md). The board/OS choice is settled; the exact GPIO backend, OLED, power hardware, GNSS input and mechanical layout still require selection and bench testing.
 
 ---
 
@@ -161,11 +162,11 @@ For v0.4, provide a removable mount with adjustable fit tolerance, cable access 
 
 Control goals are temperature-based speed, hysteresis, a manual override and explicit fault behavior. A 25 kHz hardware PWM implementation must be selected for the actual Pi and OS. The previous `RPi.GPIO.PWM()` example was software PWM and has been removed from active setup instructions. The old ambiguous fan wiring drawing is replaced by the [connection plan](docs/pi-setup.md#selected-fan-and-proposed-interface).
 
-The 35–45°C ramp discussed earlier is only a bench starting proposal. Sensor faults must not be treated as 0°C. The proposed fallback requests full cooling and reports a fault, with the fan's boot/crash behavior verified electrically. See [the complete review findings](docs/pi-setup.md#review-findings-to-resolve-in-implementation).
+The 35–45°C ramp discussed earlier is only a bench starting proposal. Sensor faults must not be treated as 0°C. The simulation requests full cooling and reports a fault. The fan's physical boot/crash behavior still needs electrical verification. See [the complete review findings](docs/pi-setup.md#review-findings-to-resolve-in-implementation).
 
 ## Pi controller and status display
 
-The selected host is a Pi Zero 2 W with Raspberry Pi OS Lite. Implement sensor reading, fan/LED/button control, display updates and service management as separate components. Start with simulation and bench tests before the mount installation. The Pi controls accessories; the power-distribution hardware supplies them. Define a Linux shutdown and power-hold strategy before adding ignition or master-cutoff control.
+The selected host is a Pi Zero 2 W with Raspberry Pi OS Lite. The first software milestone implements simulated fan/LED control, sample parsing, fault policy, configuration and console status. Run `python3 -m truck_gps --format json` from `src/pi/` with Python 3.11+. Live sensor acquisition, GPIO/PWM adapters, buttons and OLED remain next steps; see [software instructions and tests](src/pi/README.md). The Pi controls accessories; the power-distribution hardware supplies them. Define a Linux shutdown and power-hold strategy before adding ignition or master-cutoff control.
 
 An SSD1306 or SH1106 OLED remains planned. Select the exact module and verify its dimensions, driver, I²C address, supply/pull-ups, viewing angle and day/night readability. Its screen should show:
 
@@ -174,7 +175,7 @@ An SSD1306 or SH1106 OLED remains planned. Select the exact module and verify it
 - Requested fan duty and measured RPM if tach feedback is installed.
 - Actual controller/switch state, with unavailable power feedback labeled as unknown.
 
-The former OLED snippet used fixed fan and switch values and CPU temperature, so it has been replaced by [implementation requirements](docs/pi-setup.md#proposed-files-to-implement-under-srcpi). OLED or network failure must not block local cooling. Install Python dependencies in the application's virtual environment once the exact board/module stack is selected.
+The former OLED snippet used fixed fan and switch values and CPU temperature, so it has been replaced by [implementation requirements](docs/pi-setup.md#software-status-under-srcpi). OLED or network failure must not block local cooling. Install Python dependencies in the application's virtual environment once the exact board/module stack is selected.
 
 ## v0.4 inputs
 
@@ -189,4 +190,5 @@ Finish and record the v0.2 fit tests, then check the v0.3 mounting tabs and M2 h
    * Configure a Raspberry Pi Zero 2W with Tailscale and connect it to truck Starlink Wi-Fi.
    * Write a lightweight service in Python to process GPS NMEA data sentences.
    * Design a simple dashboard map using TomTom Orbis Web SDK / API.
+
 

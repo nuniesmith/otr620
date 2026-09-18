@@ -1,0 +1,24 @@
+[Unit]
+Description=Truck GPS controller simulation (no hardware outputs)
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=truck-gps
+Group=truck-gps
+WorkingDirectory=/opt/truck-gps
+ExecStart=/opt/truck-gps/.venv/bin/truck-gps --mode simulate --config /etc/truck-gps/config.toml --format json --realtime --loop
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
