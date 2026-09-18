@@ -738,3 +738,24 @@ update for the future to use the pi zero, so we can get a full OS with all the f
 I’ll make the **Raspberry Pi Zero 2 W with Raspberry Pi OS Lite** the selected host. That gives us Linux for SSH, Tailscale and the web services, plus GPIO, I²C, 1-Wire and a verified hardware PWM setup for accessory control. I’ll include that decision in this update.
 
 Archive note: the final host decision above supersedes the earlier Pico/Zero comparison. The hardware PWM backend is a requirement still to implement and verify, not working code. See [the current setup plan](pi-setup.md).
+
+
+## Controller simulation milestone — September 18, 2026
+
+Archive note: the following records the available continuation prompts and a labelled implementation summary. It does not reconstruct missing assistant messages verbatim.
+
+### User
+
+What can we work on next?
+
+### User
+
+Okay continue
+
+### User
+
+continue
+
+### Implementation summary
+
+Continued the Pi Zero 2 W software work while physical fit results remain pending. Created `src/pi/` with a simulation-only controller, fan curve and hysteresis, auto/full-speed boost modes, LED commands, captured sensor-text parsing, fault handling, validated configuration, scenarios, text/JSON status and an optional simulation service template. Added 21 passing software tests. The simulation does not access GPIO, measure RPM, switch GPS power or read physical sensors. Physical integration and v0.4 CAD remain future work. See [the package README](../src/pi/README.md) for the current behavior and limitations.

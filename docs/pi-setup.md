@@ -2,7 +2,7 @@
 
 [Project](../README.md) · [Tasks](todo.md) · [V3.1 print notes](../src/stl/v0.3/README.md)
 
-Status: planning, not installed software. The reviewed `main` commit was `f8075d72dddf59a85583dda3cea287938e356ffc`; it had no `src/pi/` directory. The previous README examples have been withdrawn from the active instructions because they were incomplete. No controller software or v0.4 CAD is implemented by this documentation update.
+Status: **simulation software implemented; hardware integration pending**. The earlier review of commit `f8075d72dddf59a85583dda3cea287938e356ffc` found no `src/pi/` directory and withdrew incomplete README snippets. The first package now implements deterministic fan/LED decisions, fault handling, configuration, console status and tests. It has no physical outputs or live sensor reads. No v0.4 CAD has been generated. See [running instructions](../src/pi/README.md).
 
 ## Decisions and outstanding choices
 
@@ -54,36 +54,43 @@ GPIO18 is a candidate signal pin, not a finalized wiring instruction. `RPi.GPIO.
 | Abrupt master power-off is assumed | Define shutdown request, power-hold hardware and restart behavior before connecting ignition control. |
 | GPS data source is unspecified | Verify a usable live Garmin interface or select a supported external GNSS receiver. |
 
-On temperature-sensor failure, the proposed controller should request full cooling while the fan branch is powered and report a fault. This software policy cannot guarantee cooling during a power failure or a crashed GPIO driver; bench-test the electrical default state. Define how manual override interacts with sensor faults and thermal limits before implementation.
+On temperature-sensor failure, the simulation requests full cooling and reports a fault; a future hardware adapter must apply that request while the fan branch is powered. This software policy cannot guarantee cooling during a power failure or a crashed GPIO driver; bench-test the electrical default state. The implemented simulation permits auto or full-speed boost; sensor faults take priority. A force-off mode is not provided. Validate the policy with the physical hardware before use.
 
-The earlier 35–45°C ramp is a **bench starting proposal**, not a validated protection limit. Add hysteresis, startup behavior and minimum stable duty. Calibrate against actual sensor placement and the GPS/charger operating limits. A housing sensor does not measure the device's internal battery temperature.
+The earlier 35–45°C ramp is a **bench starting proposal**, not a validated protection limit. Simulation uses 35°C start, 32°C stop and a provisional 30% minimum request. Startup behavior and minimum stable duty still need physical calibration. Calibrate against actual sensor placement and the GPS/charger operating limits. A housing sensor does not measure the device's internal battery temperature.
 
-## Proposed files to implement under src/pi
+## Software status under src/pi
 
-These are planned files, not commands or modules that already exist.
+Run the package with Python 3.11+; no GPIO libraries are imported. The only supported mode is `simulate`.
 
-| File | Responsibility |
-|---|---|
-| `README.md` | Installation, wiring, first boot and troubleshooting |
-| `pyproject.toml` | Package entry point and tested dependency versions |
-| `config.example.toml` | Pins, sensor IDs, thresholds, manual override and enabled accessories |
-| `truck_gps/sensors.py` | Sensor parsing, deadlines, validity and stale-data reporting |
-| `truck_gps/hardware.py` | Board-specific GPIO/PWM adapters and a simulation adapter |
-| `truck_gps/controller.py` | Fan/LED/button state machine, hysteresis and fault policy |
-| `truck_gps/display.py` | Optional OLED renderer using actual shared state |
-| `truck_gps/main.py` | Startup, structured state, logging and controlled shutdown |
-| `systemd/truck-gps.service` | Service user, device permissions, restart limits and startup |
-| `tests/` | Missing/bad/stale sensor, fan boundaries, overrides and restart behavior |
+```sh
+cd src/pi
+python3 -m truck_gps --config config.example.toml --format json
+python3 -m unittest discover -s tests -v
+```
 
-Keep the control loop local and independent of Tailscale, maps, OLED and internet availability. Use a Python virtual environment and a service account with only the needed device permissions. Keep credentials outside the repository.
+| File | Implemented now | Remaining hardware work |
+|---|---|---|
+| `README.md`, `pyproject.toml` | Quickstart and installable CLI, no external runtime dependencies | Verify on the actual Pi OS/Python |
+| `config.example.toml`, `truck_gps/config.py` | Validated thresholds, expected sensor ID and LED settings | Pin/interface configuration after hardware selection |
+| `truck_gps/sensors.py` | Pure captured 1-Wire sample parser and typed faults | Identified device reads with bounded acquisition |
+| `truck_gps/hardware.py` | Simulation output adapter only | Verified PWM/GPIO adapters, boot/crash behavior |
+| `truck_gps/controller.py` | Fan curve/hysteresis, auto/boost, LED requests and fault priority | Startup kick/minimum-duty calibration and buttons |
+| `truck_gps/display.py` | Text/JSON status; RPM and GPS power explicitly unknown | OLED renderer, bounded network status |
+| `truck_gps/main.py`, `truck_gps/simulation.py` | Validated scenarios, virtual time, logging and signal handling | Live acquisition/control scheduling |
+| `systemd/truck-gps-sim.service` | Optional simulation-only template denying device access | Actual Pi installation and production service permissions |
+| `tests/` | 21 passing software tests, including CLI/SIGTERM | Physical sensor/fan/output and Pi boot tests |
+
+The demo runs immediately by default; `--realtime --loop` paces a repeating scenario. It does not run a real temperature acquisition loop. Scenario timestamps are virtual. A hardware service must use actual monotonic sample times and keep reads, display/network operations and control scheduling independent.
+
+Keep the control loop local and independent of Tailscale, maps, OLED and internet availability. Use a Python virtual environment and a service account with only the needed device permissions. Keep credentials outside the repository. Read [the package documentation](../src/pi/README.md) for configuration, fault recovery and service-template limitations.
 
 ## Bring-up sequence when the Pi arrives
 
 1. Use Raspberry Pi Imager to install an OS Lite image supported by the selected board. Configure hostname, user, Wi-Fi country/network and SSH access. Boot on a suitable bench supply. [Official setup guide](https://www.raspberrypi.com/documentation/computers/getting-started.html)
 2. Update the OS, record its version and establish SSH. Install Tailscale using its current Linux instructions and verify access from an authorized device. [Tailscale installation](https://tailscale.com/docs/install/linux)
 3. Enable I²C and 1-Wire using the selected OS configuration tools. Test the identified temperature sensor and exact OLED module separately. Match SSD1306 versus SH1106 drivers and verify supply and pull-up voltages. [Pi configuration guide](https://www.raspberrypi.com/documentation/computers/configuration.html)
-4. Build the package and simulation tests. Freeze board/OS-specific GPIO dependencies only after verifying support.
-5. With the selected PWM interface and protected fan supply, test commanded duty, startup, stopping, optional tach feedback and sensor disconnection. Verify timing under load.
+4. Run the existing package and simulation tests on the Pi; record the OS/Python versions. Freeze board/OS-specific GPIO dependencies only after verifying support.
+5. Implement live sensor acquisition and the hardware adapter. With the selected PWM interface and protected fan supply, test commanded duty, startup, stopping, optional tach feedback and sensor disconnection. Verify timing under load.
 6. Add dim LEDs and debounced buttons. Verify that accessory switching does not interrupt the Garmin branch.
 7. Add the service and test reboot, service crash, missing OLED, Wi-Fi loss and controlled shutdown. Do not rely on service restarts alone as the fan's electrical fallback.
 8. Add GNSS logging and the home map later. Validate no-fix/stale-fix handling, trip distance, year boundaries and storage retention before adding traffic APIs. Keep trip data usable during network outages.
@@ -99,3 +106,4 @@ Use `src/stl/v0.4/` for the next mechanical revision once inputs are available; 
 - Design a removable electronics carrier, adjustable fan mount, separate ventilation path, serviceable wiring and modular display/switch cutouts.
 - Maintain the padded GPS support, removable faceplate, speaker path and upward-facing accessory tray.
 - Print new local fit coupons before exporting the complete v0.4 assembly. Check bed footprint, supports and interfaces again.
+

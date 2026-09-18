@@ -151,9 +151,22 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 - [ ] Configure hysteresis, startup/minimum duty and manual override. Treat the earlier 35–45°C ramp as a provisional bench setting.
 - [ ] Test sensor disconnects, a stuck/crashed output, reboot and supply loss. Software requesting full cooling cannot guarantee cooling after loss of power or control hardware.
 - [ ] Add optional tach feedback; distinguish requested duty from measured speed.
-- [ ] Package the controller with simulation mode, configuration and service management using the [Pi implementation plan](pi-setup.md).
+- [ ] Deploy the hardware-enabled controller and production service on the Pi after bench validation; the simulation package and service example are implemented below.
 
 ---
+
+### First software milestone — simulation complete
+
+- [x] Add a Python 3.11+ package and CLI with no external runtime dependencies.
+- [x] Implement automatic fan curve/hysteresis, full-speed boost and LED switch/brightness decisions.
+- [x] Parse captured 1-Wire samples and request full cooling for missing, invalid, wrong-ID or stale readings.
+- [x] Keep requested outputs separate from unknown RPM and GPS power feedback.
+- [x] Add validated TOML settings, JSON scenarios, text/JSON output and clean signal handling.
+- [x] Pass 21 software tests covering control boundaries, faults, recovery, restart state, input validation and CLI behavior.
+- [x] Include a simulation-only systemd example; physical installation remains pending.
+- [ ] Run the package on the actual Pi OS and record versions and results.
+- [ ] Add bounded live sensor acquisition, verified fan/LED outputs and debounced physical buttons.
+- [ ] Calibrate physical startup/minimum fan duty and test electrical fallback independently of software.
 
 ## 9. Status Display & Dashboard HUD (I2C OLED)
 
@@ -187,7 +200,8 @@ Goal: leverage the in-truck Starlink Wi-Fi network and a private VPN overlay to 
 - [x] Verify the three model directories under `src/stl/` and the V3.1 source, 12 STLs, hardware image and mesh report under `src/stl/v0.3/`.
 - [x] Preserve the supplied Claude v0.1/v0.2 responses and available ChatGPT discussion in `docs/chats.md`.
 - [x] Preserve the newer telemetry, cooling and OLED plans while reconciling documentation links and current session paths.
-- [ ] Implement controller software under `src/pi/` when development starts; this remains a planned directory.
+- [x] Create the first `src/pi/` controller package with simulation, validated settings, fault reporting and CLI tests.
+- [ ] Implement and bench-test live sensor, GPIO/PWM, button and OLED adapters before enabling hardware control.
 - [ ] If any original Claude prompts, code blocks or turns are missing from the supplied text, append them with their session labels.
 - [ ] Update the mechanical source, exported files and print notes together after measured fit changes.
 
